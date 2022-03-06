@@ -1,13 +1,19 @@
 #pragma once
+#include "gfx/window.h"
 
-namespace assault_core
+namespace assault
 {
   class core
   {
   public:
     CLASS_SPECIALS_NONE_CUSTOM(core);
 
-    core() = default;
+    core();
 
+  private:
+    void run();
+
+  private:
+    graphics::window m_main_wnd;
   };
 }
