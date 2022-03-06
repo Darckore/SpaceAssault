@@ -1,9 +1,17 @@
 #pragma once
+#include "core/exception.h"
 
 namespace assault::graphics
 {
   class window
   {
+  public:
+    class wnd_error : public err::exception
+    {
+    public:
+      using exception::exception;
+    };
+
   public:
     using str_type      = std::string;
     using size_type     = std::size_t;
@@ -21,10 +29,11 @@ namespace assault::graphics
     window(str_type title, str_type name, size_type width, size_type height);
 
   public:
-    proc_result window_proc(msg_wrapper msg) noexcept;//(handle_type h, unsigned msg, uintptr_type wp, intptr_type lp) noexcept;
+    proc_result window_proc(msg_wrapper msg) noexcept;
+    handle_type handle() const noexcept;
 
   private:
-    bool init() noexcept;
+    void init();
 
   private:
     str_type m_title;

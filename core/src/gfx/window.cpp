@@ -46,6 +46,11 @@ namespace assault::graphics
     return DefWindowProc(handle, msg_code, wp, lp);
   }
 
+  window::handle_type window::handle() const noexcept
+  {
+    return m_handle;
+  }
+
   // Private members
 
   namespace
@@ -111,12 +116,12 @@ namespace assault::graphics
     }
   }
 
-  bool window::init() noexcept
+  void window::init()
   {
     auto inst_handle = make_wnd_class(m_name);
     if (!inst_handle)
     {
-      return false;
+      throw wnd_error{ "Failed to register window class" };
     }
 
     auto [posX, posY, width, height] = adjust_size(m_width, m_height);
@@ -133,15 +138,13 @@ namespace assault::graphics
 
     if (!handle)
     {
-      return false;
+      throw wnd_error{ "Failed to create window" };
     }
 
     SetWindowText(handle, m_title.data());
     ShowWindow(handle, SW_SHOW);
     UpdateWindow(handle);
     m_handle = handle;
-
-    return true;
   }
 
 }
