@@ -35,7 +35,7 @@ namespace assault::graphics
 
     ~window() noexcept;
 
-    window(str_type title, str_type name, size_type width, size_type height);
+    window(str_type title, str_type name);
 
   private:
     proc_result window_proc(msg_wrapper msg) noexcept;

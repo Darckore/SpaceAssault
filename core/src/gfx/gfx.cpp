@@ -98,7 +98,8 @@ namespace assault::graphics
   gfx::gfx(window& wnd) :
     m_wnd{ wnd },
     m_render{ get_renderer() },
-    m_viewPort{ wnd.size() }
+    m_size{ wnd.size() },
+    m_aspect{ calc_aspect_ratio() }
   { }
 
   // Public members
@@ -115,12 +116,13 @@ namespace assault::graphics
   void gfx::setup() noexcept
   {
     auto wndSize = m_wnd.size();
-    if (wndSize == m_viewPort)
+    if (wndSize == m_size)
     {
       return;
     }
 
-    m_viewPort = wndSize;
+    m_size = wndSize;
+    m_aspect = calc_aspect_ratio();
     m_render.reset();
   }
 
@@ -140,6 +142,11 @@ namespace assault::graphics
   {
     auto&& res_storage = renderer::storage();
     res_storage.erase(this);
+  }
+
+  gfx::ratio_type gfx::calc_aspect_ratio() const noexcept
+  {
+    return ratio_type{ m_size.width, m_size.height }.get_simplified();
   }
 
 }

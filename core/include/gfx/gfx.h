@@ -18,6 +18,8 @@ namespace assault::graphics
 
   public:
     using viewport_size = window::dimensions;
+    using size_type     = window::size_type;
+    using ratio_type    = utils::ratio<size_type>;
 
   public:
     CLASS_SPECIALS_NONE(gfx);
@@ -35,9 +37,12 @@ namespace assault::graphics
     renderer& get_renderer();
     void release_renderer();
 
+    ratio_type calc_aspect_ratio() const noexcept;
+
   private:
     window& m_wnd;
     renderer& m_render;
-    viewport_size m_viewPort{};
+    viewport_size m_size{};
+    ratio_type m_aspect{};
   };
 }

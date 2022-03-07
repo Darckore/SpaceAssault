@@ -55,7 +55,7 @@ namespace assault
     ShowWindow(GetConsoleWindow(), SW_HIDE);
   #endif
 
-    return { "Space Assault", "SA_MAIN", 1280, 720 };
+    return { "Space Assault", "SA_MAIN" };
   }
   core::graphics_type core::init_graphics(window_type& wnd)
   {

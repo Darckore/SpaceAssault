@@ -12,10 +12,9 @@ namespace assault::graphics
     UnregisterClass(m_name.c_str(), inst_handle);
   }
 
-  window::window(str_type title, str_type name, size_type width, size_type height) :
+  window::window(str_type title, str_type name) :
     m_title{ std::move(title) },
-    m_name{ std::move(name) },
-    m_size{ width, height }
+    m_name{ std::move(name) }
   {
     init();
   }
@@ -88,7 +87,7 @@ namespace assault::graphics
 
       WNDCLASSEX wc = {};
       wc.cbSize = sizeof(WNDCLASSEX);
-      wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS | CS_OWNDC;
+      wc.style = CS_HREDRAW | CS_VREDRAW;
       wc.lpfnWndProc = wnd_proc;
       wc.cbClsExtra = 0;
       wc.cbWndExtra = 0;
@@ -107,20 +106,17 @@ namespace assault::graphics
 
       return inst_handle;
     }
-    static auto adjust_size(window::size_type w, window::size_type h) noexcept
+    static auto calc_size() noexcept
     {
-      auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
-      auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
+      MONITORINFO monitorInfo{ sizeof(monitorInfo) };
+      auto monitorHandle = MonitorFromPoint(POINT{}, MONITOR_DEFAULTTOPRIMARY);
+      GetMonitorInfo(monitorHandle, &monitorInfo);
 
-      // Adjust client width and height
-      RECT r = { 0, 0, static_cast<LONG>(w), static_cast<LONG>(h) };
-      AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, FALSE);
-
-      auto width = r.right - r.left;
-      auto height = r.bottom - r.top;
-      auto posX = screenWidth / 2 - width / 2;
-      auto posY = screenHeight / 2 - height / 2;
-
+      const auto& monitorRect = monitorInfo.rcMonitor;
+      const auto posX   = monitorRect.left;
+      const auto posY   = monitorRect.top;
+      const auto width  = monitorRect.right - posX;
+      const auto height = monitorRect.bottom - posY;
       return RECT{ posX, posY, width, height };
     }
   };
@@ -133,22 +129,25 @@ namespace assault::graphics
       throw wnd_error{ "Failed to register window class" };
     }
 
-    auto [posX, posY, width, height] = wnd_helper::adjust_size(m_size.width, m_size.height);
-    auto handle = CreateWindowEx(
-      WS_EX_APPWINDOW,
+    auto [posX, posY, width, height] = wnd_helper::calc_size();
+    m_size = { width, height };
+    auto handle = CreateWindow(
       m_name.data(),
-      NULL,
-      WS_OVERLAPPEDWINDOW,
+      m_title.data(),
+      WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
       posX, posY, width, height,
       NULL, NULL,
       inst_handle,
       this
     );
-
+    
     if (!handle)
     {
       throw wnd_error{ "Failed to create window" };
     }
+
+    SetWindowPos(handle, HWND_TOP, posX, posY, width, height,
+                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
     SetWindowText(handle, m_title.data());
     ShowWindow(handle, SW_SHOW);
