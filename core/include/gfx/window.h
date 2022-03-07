@@ -14,12 +14,14 @@ namespace assault::graphics
 
   public:
     using str_type      = std::string;
-    using size_type     = std::size_t;
+    using size_type     = std::int32_t;
     using proc_result   = std::intptr_t;
     using handle_type   = void*;
 
     struct dimensions
     {
+      bool operator==(const dimensions&) const noexcept = default;
+
       size_type width;
       size_type height;
     };

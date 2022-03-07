@@ -6,7 +6,6 @@
 #define NOMENUS
 #define NOKEYSTATES
 #define NOSYSCOMMANDS
-#define NORASTEROPS
 #define OEMRESOURCE
 #define NOATOM
 #define NOCLIPBOARD
@@ -31,3 +30,4 @@
 #define NODEFERWINDOWPOS
 #define NOMCX
 #include <windows.h>
+#include <windowsx.h>

@@ -1,9 +1,11 @@
 #pragma once
+#include "gfx/window.h"
 #include "core/exception.h"
 
 namespace assault::graphics
 {
   class window;
+  class renderer;
 
   class gfx
   {
@@ -14,8 +16,8 @@ namespace assault::graphics
       using exception::exception;
     };
 
-  private:
-    class resources;
+  public:
+    using viewport_size = window::dimensions;
 
   public:
     CLASS_SPECIALS_NONE(gfx);
@@ -27,8 +29,15 @@ namespace assault::graphics
   public:
     void begin_frame() noexcept;
     void draw() noexcept;
+    void setup() noexcept;
+
+  private:
+    renderer& get_renderer();
+    void release_renderer();
 
   private:
     window& m_wnd;
+    renderer& m_render;
+    viewport_size m_viewPort{};
   };
 }

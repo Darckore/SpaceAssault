@@ -28,6 +28,8 @@ namespace assault::graphics
     UINT msg_code;
     WPARAM wp;
     LPARAM lp;
+
+    
   };
 
   // Public members
@@ -37,6 +39,10 @@ namespace assault::graphics
     auto [handle, msg_code, wp, lp] = msg;
     switch (msg_code)
     {
+    case WM_SIZE:
+      m_size = { GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+      return 0;
+
     case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
