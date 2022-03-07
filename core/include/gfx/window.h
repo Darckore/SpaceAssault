@@ -18,8 +18,15 @@ namespace assault::graphics
     using proc_result   = std::intptr_t;
     using handle_type   = void*;
 
+    struct dimensions
+    {
+      size_type width;
+      size_type height;
+    };
+
   private:
     struct msg_wrapper;
+    friend struct wnd_helper;
 
   public:
     CLASS_SPECIALS_NONE(window);
@@ -28,9 +35,12 @@ namespace assault::graphics
 
     window(str_type title, str_type name, size_type width, size_type height);
 
-  public:
+  private:
     proc_result window_proc(msg_wrapper msg) noexcept;
+
+  public:
     handle_type handle() const noexcept;
+    dimensions  size() const noexcept;
 
   private:
     void init();
@@ -39,7 +49,6 @@ namespace assault::graphics
     str_type m_title;
     str_type m_name;
     handle_type m_handle{};
-    size_type m_width{};
-    size_type m_height{};
+    dimensions m_size{};
   };
 }

@@ -14,6 +14,9 @@ namespace assault::graphics
       using exception::exception;
     };
 
+  private:
+    class resources;
+
   public:
     CLASS_SPECIALS_NONE(gfx);
 

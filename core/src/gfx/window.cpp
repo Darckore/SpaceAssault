@@ -15,8 +15,7 @@ namespace assault::graphics
   window::window(str_type title, str_type name, size_type width, size_type height) :
     m_title{ std::move(title) },
     m_name{ std::move(name) },
-    m_width{ width },
-    m_height{ height }
+    m_size{ width, height }
   {
     init();
   }
@@ -50,30 +49,34 @@ namespace assault::graphics
   {
     return m_handle;
   }
+  window::dimensions window::size() const noexcept
+  {
+    return m_size;
+  }
 
   // Private members
 
-  namespace
+  struct wnd_helper
   {
-    LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
-      window *wndPtr = nullptr;
+      window* wndPtr = nullptr;
       if (msg == WM_NCCREATE)
       {
-       wndPtr = reinterpret_cast<window*>(((LPCREATESTRUCT)lParam)->lpCreateParams);
-       SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wndPtr));
-       return TRUE;
+        wndPtr = reinterpret_cast<window*>(((LPCREATESTRUCT)lParam)->lpCreateParams);
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wndPtr));
+        return TRUE;
       }
-      
+
       wndPtr = reinterpret_cast<window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
       if (wndPtr)
       {
         return wndPtr->window_proc({ hwnd, msg, wParam, lParam });
       }
-      
+
       return DefWindowProc(hwnd, msg, wParam, lParam);
     }
-    auto make_wnd_class(std::string_view className) noexcept
+    static auto make_wnd_class(std::string_view className) noexcept
     {
       auto inst_handle = GetModuleHandle(0);
 
@@ -98,33 +101,33 @@ namespace assault::graphics
 
       return inst_handle;
     }
-    auto adjust_size(window::size_type w, window::size_type h) noexcept
+    static auto adjust_size(window::size_type w, window::size_type h) noexcept
     {
-      auto screenWidth  = GetSystemMetrics(SM_CXSCREEN);
+      auto screenWidth = GetSystemMetrics(SM_CXSCREEN);
       auto screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
       // Adjust client width and height
       RECT r = { 0, 0, static_cast<LONG>(w), static_cast<LONG>(h) };
       AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, FALSE);
 
-      auto width  = r.right - r.left;
+      auto width = r.right - r.left;
       auto height = r.bottom - r.top;
       auto posX = screenWidth / 2 - width / 2;
       auto posY = screenHeight / 2 - height / 2;
 
       return RECT{ posX, posY, width, height };
     }
-  }
+  };
 
   void window::init()
   {
-    auto inst_handle = make_wnd_class(m_name);
+    auto inst_handle = wnd_helper::make_wnd_class(m_name);
     if (!inst_handle)
     {
       throw wnd_error{ "Failed to register window class" };
     }
 
-    auto [posX, posY, width, height] = adjust_size(m_width, m_height);
+    auto [posX, posY, width, height] = wnd_helper::adjust_size(m_size.width, m_size.height);
     auto handle = CreateWindowEx(
       WS_EX_APPWINDOW,
       m_name.data(),
