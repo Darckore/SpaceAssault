@@ -39,6 +39,36 @@ namespace utils
 
     template <real T>
     using sqrt_magic_t = typename sqrt_magic<T>::type;
+
+    template <max_int_t Bytes>
+    struct max_factorial;
+
+    template <max_int_t Bytes>
+    inline constexpr auto max_factorial_v = max_factorial<Bytes>::value;
+
+    template <>
+    struct max_factorial<1>
+    {
+      static constexpr max_int_t value{ 5 };
+    };
+
+    template <>
+    struct max_factorial<2>
+    {
+      static constexpr max_int_t value{ 8 };
+    };
+
+    template <>
+    struct max_factorial<4>
+    {
+      static constexpr max_int_t value{ 12 };
+    };
+
+    template <>
+    struct max_factorial<8>
+    {
+      static constexpr max_int_t value{ 20 };
+    };
   } 
    
   //
@@ -65,9 +95,8 @@ namespace utils
   //
   // A constexpr abs version
   //
-  template <typename T>
+  template <typename T> requires std::is_arithmetic_v<T>
   constexpr auto abs(T val) noexcept
-    requires std::is_arithmetic_v<T>
   {
     if constexpr (std::is_unsigned_v<T>)
       return val;
@@ -76,11 +105,10 @@ namespace utils
   }
 
   //
-  // Checks the sign
+  // Return the sign of the given value
   //
-  template <typename T>
+  template <typename T> requires std::is_arithmetic_v<T>
   constexpr auto sign(T val) noexcept
-    requires std::is_arithmetic_v<T>
   {
     if constexpr (std::is_unsigned_v<T>)
       return val != 0 ? T{ 1 } : T{ 0 };
@@ -94,33 +122,47 @@ namespace utils
   // This is mostly for floats
   // To avoid dealing with the epsilon bs on comparing them
   //
-  template <detail::comparable T>
+  template <detail::comparable T> requires std::is_arithmetic_v<T>
   constexpr bool eq(T left, T right) noexcept
-    requires std::is_arithmetic_v<T>
   {
     constexpr auto max_diff = std::numeric_limits<T>::epsilon();
     return abs(left - right) <= max_diff;
   }
 
   //
-  // Converts degrees to radians
+  // Inverts the value ( 1 / val )
   //
-  template <detail::real Angle>
-  constexpr auto deg_to_rad(Angle angle) noexcept
+  template <detail::real T>
+  constexpr auto inv(T val) noexcept
   {
-    return angle * std::numbers::pi_v<Angle> / 180;
+    if (eq(val, T{}))
+      return T{};
+
+    return T{ 1 } / val;
   }
 
   //
-  // Converts radians to degrees
+  // Factorial
+  // Returns 0 if overflown
   //
-  template <detail::real Angle>
-  constexpr auto rad_to_deg(Angle angle) noexcept
+  template <detail::integer I> requires std::is_unsigned_v<I>
+  constexpr auto factorial(I value) noexcept
   {
-    return angle * 180 / std::numbers::pi_v<Angle>;
-  }
+    using result_type = detail::max_int_t;
+    if (!value)
+      return result_type{ 1 };
 
+    if (value > detail::max_factorial_v<sizeof(result_type)>)
+      return result_type{};
+
+    auto res = result_type{ value };
+    for (result_type cur = value - 1; cur != 0; --cur)
+      res *= cur;
+
+    return res;
+  }
 }
 
+#include "trig.hpp"
 #include "ratio.hpp"
 #include "vector.hpp"

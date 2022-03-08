@@ -24,6 +24,14 @@ namespace utils
 
     static constexpr auto zero_coord = value_type{ 0 };
 
+    template <size_type Axis> requires (Axis < dimensions)
+    static consteval auto axis_norm() noexcept
+    {
+      vector <value_type, dimensions> res;
+      res.get<Axis>() = value_type{ 1 };
+      return res;
+    }
+
   public:
     CLASS_SPECIALS_ALL(vector);
 
@@ -35,10 +43,6 @@ namespace utils
     template <detail::coordinate First, detail::coordinate... Rest> requires (sizeof...(Rest) <= dimensions - 1)
     constexpr vector(First first, Rest ...values) noexcept :
       m_coords{ static_cast<value_type>(first), static_cast<value_type>(values)... }
-    { }
-
-    constexpr explicit vector(const storage_type& arr) :
-      m_coords{ arr }
     { }
 
     template <detail::coordinate U, size_type N>
@@ -64,23 +68,16 @@ namespace utils
     template <detail::coordinate U>
     constexpr auto operator+(const vector<U, dimensions>& other) const noexcept
     {
-      if constexpr (std::is_same_v<value_type, U>)
-      {
-        storage_type dest{};
-        auto thisIt  = m_coords.begin();
-        auto otherIt = other.m_coords.begin();
-        std::transform(dest.begin(), dest.end(), dest.begin(),
-                       [&thisIt, &otherIt](auto)
-                       {
-                         return *(thisIt++) + *(otherIt++);
-                       });
-        return vector<value_type, dimensions>{ dest };
-      }
-      else
-      {
-        using ct = std::common_type_t<U, value_type>;
-        return to<ct, dimensions>() + other.template to<ct, dimensions>();
-      }
+      using ct = std::common_type_t<U, value_type>;
+      vector<ct, dimensions> dest;
+      auto thisIt  = begin();
+      auto otherIt = other.begin();
+      std::transform(dest.begin(), dest.end(), dest.begin(),
+                     [&thisIt, &otherIt](auto)
+                     {
+                       return ct{ *(thisIt++) + *(otherIt++) };
+                     });
+      return dest;
     }
 
     template <detail::coordinate U, size_type N>
@@ -94,23 +91,16 @@ namespace utils
     template <detail::coordinate U>
     constexpr auto operator-(const vector<U, dimensions>& other) const noexcept
     {
-      if constexpr (std::is_same_v<value_type, U>)
-      {
-        storage_type dest{};
-        auto thisIt  = m_coords.begin();
-        auto otherIt = other.m_coords.begin();
-        std::transform(dest.begin(), dest.end(), dest.begin(),
-                       [&thisIt, &otherIt](auto)
-                       {
-                         return *(thisIt++) - *(otherIt++);
-                       });
-        return vector<value_type, dimensions>{ dest };
-      }
-      else
-      {
-        using ct = std::common_type_t<U, value_type>;
-        return to<ct, dimensions>() - other.template to<ct, dimensions>();
-      }
+      using ct = std::common_type_t<U, value_type>;
+      vector<ct, dimensions> dest;
+      auto thisIt  = begin();
+      auto otherIt = other.begin();
+      std::transform(dest.begin(), dest.end(), dest.begin(),
+                     [&thisIt, &otherIt](auto)
+                     {
+                       return ct{ *(thisIt++) - *(otherIt++) };
+                     });
+      return dest;
     }
 
     template <detail::coordinate U, size_type N>
@@ -129,7 +119,7 @@ namespace utils
       return std::accumulate(m_coords.begin(), m_coords.end(), ct{},
                              [&it](auto acc, auto cur)
                              {
-                               return acc + static_cast<ct>(cur * *(it++));
+                               return acc + ct{ cur * *(it++) };
                              });
     }
 
@@ -151,14 +141,14 @@ namespace utils
       }
       else
       {
-        std::array<U, N> dest{};
+        vector<U, N> dest;
         auto destIt = dest.begin();
-        ranges::for_each_n(m_coords.begin(), std::min(dimensions, N), [&destIt](auto val)
+        ranges::for_each_n(begin(), std::min(dimensions, N), [&destIt](auto val)
                            {
                              *(destIt++) = static_cast<U>(val);
                            });
 
-        return vector<U, N>{ dest };
+        return dest;
       }
     }
 
@@ -171,7 +161,7 @@ namespace utils
   public:
     constexpr auto len_sq() const noexcept
     {
-      return std::accumulate(m_coords.begin(), m_coords.end(), zero_coord,
+      return std::accumulate(begin(), end(), zero_coord,
                              [](auto acc, auto cur)
                              {
                                return acc + cur * cur;
@@ -186,7 +176,7 @@ namespace utils
     constexpr auto get_scaled(detail::coordinate auto scalar) const noexcept
     {
       vector result;
-      std::transform(m_coords.begin(), m_coords.end(), result.m_coords.begin(),
+      std::transform(begin(), end(), result.begin(),
                      [scalar](auto cur)
                      {
                        return static_cast<value_type>(cur * scalar);
@@ -199,6 +189,34 @@ namespace utils
       return *this;
     }
 
+    constexpr auto get_rotated(detail::real auto angle) const noexcept requires (dimensions >= 2)
+    {
+      vector<value_type, dimensions> res;
+      const auto cosA = cos(angle);
+      const auto sinA = sin(angle);
+
+      // Special case for 2D
+      if constexpr (dimensions == 2)
+      {
+        auto&& x = get<0>();
+        auto&& y = get<1>();
+        res.template get<0>() = x * cosA - y * sinA;
+        res.template get<1>() = x * sinA + y * cosA;
+        return res;
+      }
+      else
+      {
+        // Todo: higher dimensions
+        unused(angle, res);
+        return *this;
+      }
+    }
+    constexpr auto& rotate(detail::real auto angle) noexcept
+    {
+      *this = get_rotated(angle);
+      return *this;
+    }
+
     constexpr auto get_normalised() const noexcept
     {
       return *this / len();
@@ -207,6 +225,28 @@ namespace utils
     {
       *this = get_normalised();
       return *this;
+    }
+
+    //
+    // Cross product
+    // Only supported in 2 and 3 dimensions
+    //
+    template <detail::coordinate U> requires (eq_any(dimensions, 2, 3))
+    constexpr auto cross(const vector<U, dimensions>& other) const noexcept
+    {
+      // Special case for 2D - we get a number
+      if constexpr (dimensions == 2)
+      {
+        return get<0>() * other.template get<1>() - get<1>() * other.template get<0>();
+      }
+      else
+      {
+        using ct = std::common_type_t<U, value_type>;
+        const auto c0 = ct{ get<1>() * other.template get<2>() - get<2>() * other.template get<1>() };
+        const auto c1 = ct{ get<2>() * other.template get<0>() - get<0>() * other.template get<2>() };
+        const auto c2 = ct{ get<0>() * other.template get<1>() - get<1>() * other.template get<0>() };
+        return vector<ct, dimensions>{ c0, c1, c2 };
+      }
     }
 
     template <size_type N> requires (N < dimensions)
@@ -228,25 +268,27 @@ namespace utils
     {
       return m_coords.end();
     }
+    constexpr auto begin() noexcept
+    {
+      return m_coords.begin();
+    }
+    constexpr auto end() noexcept
+    {
+      return m_coords.end();
+    }
 
   private:
     template <typename U>
     constexpr bool eq(const vector<U, dimensions>& other) const noexcept
     {
-      if constexpr (std::is_same_v<U, value_type>)
+      using ct = std::common_type_t<U, value_type>;
+      auto otherIt = other.begin();
+      for (auto it = begin(); it != end(); ++it, ++otherIt)
       {
-        for (auto i1 = m_coords.begin(), i2 = other.m_coords.begin(); i1 != m_coords.end(); ++i1, ++i2)
-        {
-          if (!utils::eq(*i1, *i2))
-            return false;
-        }
-        return true;
+        if (!utils::eq(static_cast<ct>(*it), static_cast<ct>(*otherIt)))
+          return false;
       }
-      else
-      {
-        using ct = std::common_type_t<U, value_type>;
-        return to<ct, dimensions>() == other.template to<ct, dimensions>();
-      }
+      return true;
     }
 
   private:
