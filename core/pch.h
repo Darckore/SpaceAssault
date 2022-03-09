@@ -25,4 +25,4 @@
 // just because it is often needed everywhere
 using namespace std::literals;
 
-#include "../utils/utils.hpp"
+#include "utils/utils.hpp"
