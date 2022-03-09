@@ -14,7 +14,7 @@ if (NOT DEFINED SA_BUILT_FROM_ROOT)
 endif()
 
 set(OPT_GTEST_DIR "${CMAKE_SOURCE_DIR}/../_third_party/gtest" CACHE PATH "Gtest repo will be cloned here")
-set(OPT_DUTILS_DIR "${CMAKE_SOURCE_DIR}/../utils" CACHE PATH "Utils repo will be cloned here")
+set(OPT_DUTILS_DIR "${CMAKE_SOURCE_DIR}/../_deps/utils" CACHE PATH "Utils repo will be cloned here")
 option(OPT_TESTS "Whether or not to build tests" ${SA_BUILT_FROM_ROOT})
 option(OPT_APP "Whether or not to build the application" ${SA_BUILT_FROM_ROOT})
 
