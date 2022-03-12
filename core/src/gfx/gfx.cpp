@@ -12,7 +12,7 @@ namespace assault::graphics
 
   gfx::gfx(window& wnd) :
     m_wnd{ wnd },
-    m_render{ get_renderer() },
+    m_renderer{ get_renderer() },
     m_size{ wnd.size() },
     m_aspect{ calc_aspect_ratio() }
   { }
@@ -22,11 +22,11 @@ namespace assault::graphics
   void gfx::begin_frame() noexcept
   {
     setup();
-    m_render.init_drawing();
+    m_renderer.init_drawing();
   }
   void gfx::draw() noexcept
   {
-    m_render.end_drawing();
+    m_renderer.end_drawing();
   }
   void gfx::setup() noexcept
   {
@@ -38,7 +38,7 @@ namespace assault::graphics
 
     m_size = wndSize;
     m_aspect = calc_aspect_ratio();
-    m_render.reset();
+    m_renderer.reset();
   }
 
   // Private members

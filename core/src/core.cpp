@@ -1,16 +1,16 @@
 #include "core/core.hpp"
 #include "core/win_includes.hpp"
-
-#include "gfx/window.hpp"
-#include "gfx/gfx.hpp"
+#include "game/base_game.hpp"
 
 namespace assault
 {
   // Special members
 
-  core::core()
+  core::core(game_type& game) :
+    m_wnd{ create_window() },
+    m_gfx{ init_graphics(m_wnd) },
+    m_game{ game }
   {
-    run();
   }
 
   // Private members
@@ -21,9 +21,6 @@ namespace assault
     using clock_type = utils::clock<time_type>;
 
     constexpr auto framerate = 1.0f / 60.0f;
-
-    auto mainWnd = create_window();
-    auto gfx     = init_graphics(mainWnd);
 
     MSG msg{};
     clock_type clock;
@@ -39,15 +36,17 @@ namespace assault
       if (const auto dt = clock.peek();
                      dt >= framerate)
       {
-        gfx.begin_frame();
+        m_gfx.begin_frame();
         clock();
       }
 
-      gfx.draw();
+      m_gfx.draw();
     }
   }
-
-  // Private members
+  void core::shutdown()
+  {
+    PostQuitMessage(0);
+  }
 
   core::window_type core::create_window()
   {

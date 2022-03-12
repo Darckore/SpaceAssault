@@ -41,7 +41,7 @@ namespace assault::graphics
 
   private:
     window& m_wnd;
-    renderer& m_render;
+    renderer& m_renderer;
     viewport_size m_size{};
     ratio_type m_aspect{};
   };
