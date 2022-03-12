@@ -34,6 +34,8 @@ namespace engine
     void loop() noexcept;
     void shutdown() noexcept;
 
+    graphics_type& gfx() noexcept;
+
     window_type create_window() noexcept;
     graphics_type init_graphics(window_type& wnd) noexcept;
 

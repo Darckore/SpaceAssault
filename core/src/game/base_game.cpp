@@ -4,8 +4,8 @@ namespace engine
 {
   // Special members
 
-  base_game::base_game() noexcept
-    : m_engine{ *this }
+  base_game::base_game() noexcept :
+    m_engine{ *this }
   {
   }
 
@@ -17,6 +17,11 @@ namespace engine
   }
 
   // Protected members
+
+  base_game::graphics_type& base_game::gfx() noexcept
+  {
+    return m_engine.gfx();
+  }
 
   void base_game::quit() noexcept
   {

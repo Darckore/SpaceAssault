@@ -74,6 +74,11 @@ namespace engine
     PostQuitMessage(0);
   }
 
+  core::graphics_type& core::gfx() noexcept
+  {
+    return m_gfx;
+  }
+
   core::window_type core::create_window() noexcept
   {
   #ifdef NDEBUG
