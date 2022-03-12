@@ -1,20 +1,71 @@
 #pragma once
-#include "core/win_includes.hpp"
 
 namespace assault::graphics
 {
   class window;
   class gfx;
 
+  class buffer
+  {
+  public:
+    using handle_type = void*;
+
+  public:
+    friend class renderer;
+
+    CLASS_SPECIALS_ALL_CUSTOM(buffer);
+
+  private:
+    buffer() = default;
+
+  private:
+    void init_buffers(const window& wnd) noexcept;
+    void kill_buffers(const window& wnd) noexcept;
+
+    void clear(const window& wnd) noexcept;
+    void swap(const window& wnd) noexcept;
+
+  public:
+    template <typename To>
+    auto active_buf() const noexcept
+    {
+      return reinterpret_cast<To>(m_cur);
+    }
+    template <typename To>
+    auto prev_buf() const noexcept
+    {
+      return reinterpret_cast<To>(m_prev);
+    }
+    template <typename To>
+    auto device() const noexcept
+    {
+      return reinterpret_cast<To>(m_device);
+    }
+    template <typename To>
+    auto wnd_device() const noexcept
+    {
+      return reinterpret_cast<To>(m_wndDevice);
+    }
+
+  private:
+    handle_type m_prev{};
+    handle_type m_cur{};
+
+    handle_type m_device{};
+    handle_type m_wndDevice{};
+  };
+
   class renderer
   {
   private:
     using storage_type = std::unordered_map<const gfx*, renderer>;
-    static storage_type& storage() noexcept;
 
   public:
     static renderer& get(const gfx* g, const window& wnd);
     static void release(const gfx* g) noexcept;
+
+  private:
+    static storage_type& storage() noexcept;
 
   public:
     CLASS_SPECIALS_NONE(renderer);
@@ -32,15 +83,10 @@ namespace assault::graphics
   private:
     void init() noexcept;
     void release() noexcept;
-    HBITMAP buffer() noexcept;
 
   private:
     const window& m_wnd;
-    HWND m_handle{};
-    HDC m_windowDC{};
-    HDC m_backBufferDC{};
-    HBITMAP m_backBuffer{};
-    HBITMAP m_oldBuffer{};
+    buffer m_buf;
   };
 
 }

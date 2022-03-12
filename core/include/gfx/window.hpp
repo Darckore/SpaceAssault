@@ -41,7 +41,11 @@ namespace assault::graphics
     proc_result window_proc(msg_wrapper msg) noexcept;
 
   public:
-    handle_type handle() const noexcept;
+    template <typename Handle>
+    auto handle() const noexcept
+    {
+      return reinterpret_cast<Handle>(m_handle);
+    }
     dimensions  size() const noexcept;
 
   private:

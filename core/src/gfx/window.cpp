@@ -8,7 +8,7 @@ namespace assault::graphics
   window::~window() noexcept
   {
     auto inst_handle = GetModuleHandle(0);
-    DestroyWindow(static_cast<HWND>(m_handle));
+    DestroyWindow(handle<HWND>());
     UnregisterClass(m_name.c_str(), inst_handle);
   }
 
@@ -50,10 +50,6 @@ namespace assault::graphics
     return DefWindowProc(handle, msg_code, wp, lp);
   }
 
-  window::handle_type window::handle() const noexcept
-  {
-    return m_handle;
-  }
   window::dimensions window::size() const noexcept
   {
     return m_size;
