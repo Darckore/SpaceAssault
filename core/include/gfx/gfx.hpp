@@ -1,6 +1,6 @@
 #pragma once
-#include "gfx/window.h"
-#include "core/exception.h"
+#include "gfx/window.hpp"
+#include "core/exception.hpp"
 
 namespace assault::graphics
 {
@@ -35,7 +35,7 @@ namespace assault::graphics
 
   private:
     renderer& get_renderer();
-    void release_renderer();
+    void release_renderer() noexcept;
 
     ratio_type calc_aspect_ratio() const noexcept;
 

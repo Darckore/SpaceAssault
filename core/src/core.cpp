@@ -1,8 +1,8 @@
-#include "core/core.h"
-#include "core/win_includes.h"
+#include "core/core.hpp"
+#include "core/win_includes.hpp"
 
-#include "gfx/window.h"
-#include "gfx/gfx.h"
+#include "gfx/window.hpp"
+#include "gfx/gfx.hpp"
 
 namespace assault
 {

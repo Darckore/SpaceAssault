@@ -1,5 +1,5 @@
 #pragma once
-#include "core/exception.h"
+#include "core/exception.hpp"
 
 namespace assault::graphics
 {

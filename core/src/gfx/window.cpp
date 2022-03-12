@@ -1,5 +1,5 @@
-#include "gfx/window.h"
-#include "core/win_includes.h"
+#include "gfx/window.hpp"
+#include "core/win_includes.hpp"
 
 namespace assault::graphics
 {
