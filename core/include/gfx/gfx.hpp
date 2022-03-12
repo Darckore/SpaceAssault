@@ -2,7 +2,7 @@
 #include "gfx/window.hpp"
 #include "core/err.hpp"
 
-namespace assault::graphics
+namespace engine::graphics
 {
   class window;
   class renderer;

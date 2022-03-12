@@ -3,7 +3,7 @@
 
 namespace assault::game
 {
-  class game : public assault::base_game
+  class game : public engine::base_game
   {
   public:
     CLASS_SPECIALS_NONE_CUSTOM(game);

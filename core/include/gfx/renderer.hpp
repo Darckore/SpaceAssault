@@ -1,6 +1,6 @@
 #pragma once
 
-namespace assault::graphics
+namespace engine::graphics
 {
   class window;
   class gfx;

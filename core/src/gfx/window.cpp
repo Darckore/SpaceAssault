@@ -1,7 +1,7 @@
 #include "gfx/window.hpp"
 #include "core/win_includes.hpp"
 
-namespace assault::graphics
+namespace engine::graphics
 {
   // Special members
 

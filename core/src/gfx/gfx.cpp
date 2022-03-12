@@ -1,7 +1,7 @@
 #include "gfx/gfx.hpp"
 #include "gfx/renderer.hpp"
 
-namespace assault::graphics
+namespace engine::graphics
 {
   // Special members
 

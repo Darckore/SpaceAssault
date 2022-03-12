@@ -2,7 +2,7 @@
 #include "core/win_includes.hpp"
 #include "game/base_game.hpp"
 
-namespace assault
+namespace engine
 {
   // Special members
 

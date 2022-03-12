@@ -2,7 +2,7 @@
 #include "gfx/window.hpp"
 #include "gfx/gfx.hpp"
 
-namespace assault
+namespace engine
 {
   class core
   {

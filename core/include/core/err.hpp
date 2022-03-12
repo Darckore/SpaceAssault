@@ -1,6 +1,6 @@
 #pragma once
 
-namespace assault::err
+namespace engine::err
 {
   class error
   {

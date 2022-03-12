@@ -1,7 +1,7 @@
 #pragma once
 #include "core/err.hpp"
 
-namespace assault::graphics
+namespace engine::graphics
 {
   class window
   {

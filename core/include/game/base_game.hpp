@@ -1,7 +1,7 @@
 #pragma once
 #include "core/core.hpp"
 
-namespace assault
+namespace engine
 {
   class base_game
   {
