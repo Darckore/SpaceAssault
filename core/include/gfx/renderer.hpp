@@ -80,6 +80,9 @@ namespace engine::graphics
     void init_drawing() noexcept;
     void end_drawing() noexcept;
 
+    //stupid test code
+    void line(const utils::vecd2& v1, const utils::vecd2& v2) noexcept;
+
   private:
     void init() noexcept;
     void release() noexcept;

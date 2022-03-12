@@ -148,6 +148,23 @@ namespace engine::graphics
     m_buf.swap(m_wnd);
   }
 
+  // Draw stuff
+
+  // stupid test code
+  void renderer::line(const utils::vecd2& v1, const utils::vecd2& v2) noexcept
+  {
+    auto pen = CreatePen(PS_SOLID, 5, 0x0000FF00);
+    auto device = detail::device(m_buf);
+    DeleteObject((HPEN)SelectObject(detail::device(m_buf), pen));
+
+    utils::point2d p1 = v1;
+    utils::point2d p2 = v2;
+    MoveToEx(device, p1.get<0>(), p1.get<1>(), nullptr);
+	  LineTo(device, p2.get<0>(), p2.get<1>());
+
+    DeleteObject(pen);
+  }
+
   // Private members
 
   void renderer::init() noexcept

@@ -2,6 +2,11 @@
 #include "gfx/window.hpp"
 #include "core/err.hpp"
 
+namespace engine
+{
+  class core;
+}
+
 namespace engine::graphics
 {
   class window;
@@ -9,6 +14,9 @@ namespace engine::graphics
 
   class gfx
   {
+  public:
+    friend class engine::core;
+
   public:
     class gfx_error : public err::error
     {
@@ -29,16 +37,20 @@ namespace engine::graphics
 
     ~gfx() noexcept;
 
-    gfx(window& wnd) noexcept;
-
     explicit operator bool() const noexcept;
 
+  private:
+    gfx(window& wnd) noexcept;
+
   public:
+    // stupid test code
+    void draw(const utils::vecd2& v1, const utils::vecd2& v2) noexcept;
+
+  private:
     void begin_frame() noexcept;
     void draw() noexcept;
     void setup() noexcept;
 
-  private:
     renderer* get_renderer() noexcept;
     void release_renderer() noexcept;
 

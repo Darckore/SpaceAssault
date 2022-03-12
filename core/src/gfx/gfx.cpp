@@ -24,6 +24,14 @@ namespace engine::graphics
 
   // Public members
 
+  // stupid test code
+  void gfx::draw(const utils::vecd2& v1, const utils::vecd2& v2) noexcept
+  {
+    m_renderer->line(v1, v2);
+  }
+
+  // Private members
+
   void gfx::begin_frame() noexcept
   {
     setup();
@@ -45,8 +53,6 @@ namespace engine::graphics
     m_aspect = calc_aspect_ratio();
     m_renderer->reset();
   }
-
-  // Private members
 
   renderer* gfx::get_renderer() noexcept
   {
