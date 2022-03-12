@@ -6,15 +6,22 @@ namespace engine
   class base_game
   {
   public:
-    CLASS_SPECIALS_NONE_CUSTOM(base_game);
-
-    base_game();
+    using time_type = core::time_type;
 
   public:
-    void run();
+    CLASS_SPECIALS_NONE_CUSTOM(base_game);
+
+    base_game() noexcept;
+
+  public:
+    void run() noexcept;
+
+    virtual bool before_run() noexcept = 0;
+    virtual void update(time_type dt) noexcept = 0;
+    virtual void render() noexcept = 0;
 
   protected:
-    void quit();
+    void quit() noexcept;
 
   private:
     core m_engine;

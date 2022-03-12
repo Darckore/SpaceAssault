@@ -4,6 +4,17 @@
 
 namespace engine
 {
+  // Statics
+
+  bool core::past_frame(time_type dt) noexcept
+  {
+    return dt >= framerate;
+  }
+  core::time_type core::clamp_time(time_type dt) noexcept
+  {
+    return std::min(dt, framerate);
+  }
+
   // Special members
 
   core::core(game_type& game) noexcept :
@@ -27,14 +38,18 @@ namespace engine
       return;
     }
 
-    using time_type = float;
-    using clock_type = utils::clock<time_type>;
+    if (!m_game.before_run())
+    {
+      return;
+    }
 
-    constexpr auto framerate = 1.0f / 60.0f;
-
+    loop();
+  }
+  void core::loop() noexcept
+  {
     MSG msg{};
     clock_type clock;
-    
+
     while (msg.message != WM_QUIT)
     {
       if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -43,13 +58,14 @@ namespace engine
         DispatchMessage(&msg);
       }
 
-      if (const auto dt = clock.peek();
-                     dt >= framerate)
+      if (const auto dt = clock.peek(); past_frame(dt))
       {
         m_gfx.begin_frame();
+        m_game.update(clamp_time(dt));
         clock();
       }
 
+      m_game.render();
       m_gfx.draw();
     }
   }

@@ -9,9 +9,18 @@ namespace engine
   public:
     friend class base_game;
 
+    using time_type = float;
+    using clock_type = utils::clock<time_type>;
     using window_type   = graphics::window;
     using graphics_type = graphics::gfx;
     using game_type = base_game;
+
+    static constexpr auto fps = time_type{ 60 };
+    static constexpr auto framerate = utils::inv(fps);
+
+  private:
+    static bool past_frame(time_type dt) noexcept;
+    static time_type clamp_time(time_type dt) noexcept;
 
   public:
     CLASS_SPECIALS_NONE(core);
@@ -22,9 +31,9 @@ namespace engine
 
   private:
     void run() noexcept;
+    void loop() noexcept;
     void shutdown() noexcept;
 
-  private:
     window_type create_window() noexcept;
     graphics_type init_graphics(window_type& wnd) noexcept;
 
