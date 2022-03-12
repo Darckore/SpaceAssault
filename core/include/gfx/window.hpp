@@ -1,15 +1,18 @@
 #pragma once
-#include "core/exception.hpp"
+#include "core/err.hpp"
 
 namespace assault::graphics
 {
   class window
   {
   public:
-    class wnd_error : public err::exception
+    class wnd_error : public err::error
     {
     public:
-      using exception::exception;
+      static constexpr auto prefix = "window"sv;
+
+    public:
+      using error::error;
     };
 
   public:
@@ -35,7 +38,9 @@ namespace assault::graphics
 
     ~window() noexcept;
 
-    window(str_type title, str_type name);
+    window(str_type title, str_type name) noexcept;
+
+    explicit operator bool() const noexcept;
 
   private:
     proc_result window_proc(msg_wrapper msg) noexcept;
@@ -49,7 +54,7 @@ namespace assault::graphics
     dimensions  size() const noexcept;
 
   private:
-    void init();
+    void init() noexcept;
 
   private:
     str_type m_title;

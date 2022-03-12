@@ -6,17 +6,27 @@ namespace assault
 {
   // Special members
 
-  core::core(game_type& game) :
+  core::core(game_type& game) noexcept :
     m_wnd{ create_window() },
     m_gfx{ init_graphics(m_wnd) },
     m_game{ game }
   {
   }
 
+  core::operator bool() const noexcept
+  {
+    return m_wnd && m_gfx;
+  }
+
   // Private members
 
-  void core::run()
+  void core::run() noexcept
   {
+    if (!*this)
+    {
+      return;
+    }
+
     using time_type = float;
     using clock_type = utils::clock<time_type>;
 
@@ -43,12 +53,12 @@ namespace assault
       m_gfx.draw();
     }
   }
-  void core::shutdown()
+  void core::shutdown() noexcept
   {
     PostQuitMessage(0);
   }
 
-  core::window_type core::create_window()
+  core::window_type core::create_window() noexcept
   {
   #ifdef NDEBUG
     ShowWindow(GetConsoleWindow(), SW_HIDE);
@@ -56,7 +66,7 @@ namespace assault
 
     return { "Space Assault", "SA_MAIN" };
   }
-  core::graphics_type core::init_graphics(window_type& wnd)
+  core::graphics_type core::init_graphics(window_type& wnd) noexcept
   {
     return { wnd };
   }

@@ -16,15 +16,17 @@ namespace assault
   public:
     CLASS_SPECIALS_NONE(core);
 
-    explicit core(game_type& game);
+    explicit core(game_type& game) noexcept;
+
+    explicit operator bool() const noexcept;
 
   private:
-    void run();
-    void shutdown();
+    void run() noexcept;
+    void shutdown() noexcept;
 
   private:
-    window_type create_window();
-    graphics_type init_graphics(window_type& wnd);
+    window_type create_window() noexcept;
+    graphics_type init_graphics(window_type& wnd) noexcept;
 
   private:
     window_type m_wnd;

@@ -1,6 +1,6 @@
 #pragma once
 #include "gfx/window.hpp"
-#include "core/exception.hpp"
+#include "core/err.hpp"
 
 namespace assault::graphics
 {
@@ -10,10 +10,13 @@ namespace assault::graphics
   class gfx
   {
   public:
-    class gfx_error : public err::exception
+    class gfx_error : public err::error
     {
     public:
-      using exception::exception;
+      static constexpr auto prefix = "gfx"sv;
+
+    public:
+      using error::error;
     };
 
   public:
@@ -26,7 +29,9 @@ namespace assault::graphics
 
     ~gfx() noexcept;
 
-    gfx(window& wnd);
+    gfx(window& wnd) noexcept;
+
+    explicit operator bool() const noexcept;
 
   public:
     void begin_frame() noexcept;
@@ -34,14 +39,14 @@ namespace assault::graphics
     void setup() noexcept;
 
   private:
-    renderer& get_renderer();
+    renderer* get_renderer() noexcept;
     void release_renderer() noexcept;
 
     ratio_type calc_aspect_ratio() const noexcept;
 
   private:
     window& m_wnd;
-    renderer& m_renderer;
+    renderer* m_renderer;
     viewport_size m_size{};
     ratio_type m_aspect{};
   };

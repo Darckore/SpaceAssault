@@ -102,7 +102,7 @@ namespace assault::graphics
     return storage;
   }
 
-  renderer& renderer::get(const gfx* g, const window& wnd)
+  renderer& renderer::get(const gfx* g, const window& wnd) noexcept
   {
     auto&& store = storage();
     if (auto item = store.find(g); item != store.end())

@@ -61,7 +61,7 @@ namespace assault::graphics
     using storage_type = std::unordered_map<const gfx*, renderer>;
 
   public:
-    static renderer& get(const gfx* g, const window& wnd);
+    static renderer& get(const gfx* g, const window& wnd) noexcept;
     static void release(const gfx* g) noexcept;
 
   private:
