@@ -1,22 +1,27 @@
-#include "gfx/window.h"
-#include "core/win_includes.h"
+#include "gfx/window.hpp"
+#include "core/win_includes.hpp"
 
-namespace assault::graphics
+namespace engine::graphics
 {
   // Special members
 
   window::~window() noexcept
   {
     auto inst_handle = GetModuleHandle(0);
-    DestroyWindow(static_cast<HWND>(m_handle));
+    DestroyWindow(handle<HWND>());
     UnregisterClass(m_name.c_str(), inst_handle);
   }
 
-  window::window(str_type title, str_type name) :
+  window::window(str_type title, str_type name) noexcept :
     m_title{ std::move(title) },
     m_name{ std::move(name) }
   {
     init();
+  }
+
+  window::operator bool() const noexcept
+  {
+    return static_cast<bool>(m_handle);
   }
 
   // Additional definitions
@@ -27,8 +32,6 @@ namespace assault::graphics
     UINT msg_code;
     WPARAM wp;
     LPARAM lp;
-
-    
   };
 
   // Public members
@@ -50,10 +53,6 @@ namespace assault::graphics
     return DefWindowProc(handle, msg_code, wp, lp);
   }
 
-  window::handle_type window::handle() const noexcept
-  {
-    return m_handle;
-  }
   window::dimensions window::size() const noexcept
   {
     return m_size;
@@ -121,12 +120,13 @@ namespace assault::graphics
     }
   };
 
-  void window::init()
+  void window::init() noexcept
   {
     auto inst_handle = wnd_helper::make_wnd_class(m_name);
     if (!inst_handle)
     {
-      throw wnd_error{ "Failed to register window class" };
+      //report wnd_error{ "Failed to register window class" };
+      return;
     }
 
     auto [posX, posY, width, height] = wnd_helper::calc_size();
@@ -143,7 +143,8 @@ namespace assault::graphics
     
     if (!handle)
     {
-      throw wnd_error{ "Failed to create window" };
+      //report wnd_error{ "Failed to create window" };
+      return;
     }
 
     SetWindowPos(handle, HWND_TOP, posX, posY, width, height,

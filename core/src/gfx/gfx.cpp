@@ -1,93 +1,8 @@
-#include "gfx/gfx.h"
-#include "core/win_includes.h"
+#include "gfx/gfx.hpp"
+#include "gfx/renderer.hpp"
 
-namespace assault::graphics
+namespace engine::graphics
 {
-  // Renderer
-
-  class renderer
-  {
-  public:
-    using storage_type = std::unordered_map<const gfx*, renderer>;
-    static storage_type& storage() noexcept
-    {
-      static storage_type storage;
-      return storage;
-    }
-
-  public:
-    CLASS_SPECIALS_NONE(renderer);
-
-    ~renderer() noexcept
-    {
-      release();
-    }
-
-    renderer(const window& wnd) noexcept :
-      m_wnd{ wnd },
-      m_handle{ reinterpret_cast<HWND>(wnd.handle()) }
-    {
-      init();
-    }
-
-  public:
-    void reset() noexcept
-    {
-      release();
-      init();
-    }
-
-    HBITMAP buffer() noexcept
-    {
-      return m_backBuffer;
-    }
-    void init_drawing() noexcept
-    {
-      auto [viewportWidth, viewportHeight] = m_wnd.size();
-      m_oldBuffer = (HBITMAP)SelectObject(m_backBufferDC, m_backBuffer);
-      BitBlt(m_backBufferDC, 0, 0, viewportWidth, viewportHeight, nullptr, 0, 0, BLACKNESS);
-    }
-    void end_drawing() noexcept
-    {
-      auto [viewportWidth, viewportHeight] = m_wnd.size();
-      BitBlt(m_windowDC, 0, 0, viewportWidth, viewportHeight, m_backBufferDC, 0, 0, SRCCOPY);
-      SelectObject(m_backBufferDC, m_oldBuffer);
-    }
-
-  private:
-    void init() noexcept
-    {
-      m_windowDC = GetDC(m_handle);
-      m_backBufferDC = CreateCompatibleDC(m_windowDC);
-
-      auto [viewportWidth, viewportHeight] = m_wnd.size();
-      m_backBuffer = CreateCompatibleBitmap(m_windowDC, viewportWidth, viewportHeight);
-
-      HBITMAP oldBitmap = (HBITMAP)SelectObject(m_backBufferDC, m_backBuffer);
-      DeleteObject(oldBitmap);
-      DeleteObject((HBRUSH)SelectObject(m_backBufferDC, GetStockObject(HOLLOW_BRUSH)));
-    }
-    void release() noexcept
-    {
-      SelectObject(m_backBufferDC, m_oldBuffer);
-      DeleteObject(m_backBuffer);
-
-      DeleteDC(m_backBufferDC);
-      m_backBufferDC = nullptr;
-
-      ReleaseDC(m_handle, m_windowDC);
-      m_windowDC = nullptr;
-    }
-
-  private:
-    const window& m_wnd;
-    HWND m_handle{};
-    HDC m_windowDC{};
-    HDC m_backBufferDC{};
-    HBITMAP m_backBuffer{};
-    HBITMAP m_oldBuffer{};
-  };
-
   // Special members
 
   gfx::~gfx() noexcept
@@ -95,23 +10,60 @@ namespace assault::graphics
     release_renderer();
   }
 
-  gfx::gfx(window& wnd) :
+  gfx::gfx(window& wnd) noexcept :
     m_wnd{ wnd },
-    m_render{ get_renderer() },
+    m_renderer{ get_renderer() },
     m_size{ wnd.size() },
     m_aspect{ calc_aspect_ratio() }
   { }
 
+  gfx::operator bool() const noexcept
+  {
+    return m_wnd && m_renderer;
+  }
+
   // Public members
+
+  gfx::ratio_type gfx::aspect() const noexcept
+  {
+    return m_aspect;
+  }
+  gfx::size_type gfx::width() const noexcept
+  {
+    return m_size.width;
+  }
+  gfx::size_type gfx::height() const noexcept
+  {
+    return m_size.height;
+  }
+
+  void gfx::bind_scaling(scale_type scale) noexcept
+  {
+    m_scale = width() / scale;
+  }
+  void gfx::set_origin(vertex_type origin) noexcept
+  {
+    m_origin = origin;
+  }
+
+  // stupid test code
+  void gfx::draw(const vertex_type& v1, const vertex_type& v2) noexcept
+  {
+    const auto cv1 = world_to_viewport(v1);
+    const auto cv2 = world_to_viewport(v2);
+    m_renderer->line(cv1, cv2);
+  }
+
+  // Private members
 
   void gfx::begin_frame() noexcept
   {
     setup();
-    m_render.init_drawing();
+    m_renderer->init_drawing();
   }
   void gfx::draw() noexcept
   {
-    m_render.end_drawing();
+    m_renderer->end_drawing();
   }
   void gfx::setup() noexcept
   {
@@ -123,25 +75,19 @@ namespace assault::graphics
 
     m_size = wndSize;
     m_aspect = calc_aspect_ratio();
-    m_render.reset();
+    m_renderer->reset();
   }
 
-  // Private members
-
-  renderer& gfx::get_renderer()
+  renderer* gfx::get_renderer() noexcept
   {
-    auto&& res_storage = renderer::storage();
-    if (auto item = res_storage.find(this); item != res_storage.end())
-    {
-      return item->second;
-    }
+    if (!m_wnd)
+      return {};
 
-    return res_storage.emplace(this, m_wnd).first->second;
+    return &renderer::get(this, m_wnd);
   }
-  void gfx::release_renderer()
+  void gfx::release_renderer() noexcept
   {
-    auto&& res_storage = renderer::storage();
-    res_storage.erase(this);
+    renderer::release(this);
   }
 
   gfx::ratio_type gfx::calc_aspect_ratio() const noexcept
@@ -149,4 +95,9 @@ namespace assault::graphics
     return ratio_type{ m_size.width, m_size.height }.get_simplified();
   }
 
+  gfx::vertex_type gfx::world_to_viewport(const vertex_type& v) const noexcept
+  {
+    auto vView = (v - m_origin) * m_scale;
+    return vView;
+  }
 }
