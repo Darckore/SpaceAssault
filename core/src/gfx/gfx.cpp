@@ -24,10 +24,34 @@ namespace engine::graphics
 
   // Public members
 
-  // stupid test code
-  void gfx::draw(const utils::vecd2& v1, const utils::vecd2& v2) noexcept
+  gfx::ratio_type gfx::aspect() const noexcept
   {
-    m_renderer->line(v1, v2);
+    return m_aspect;
+  }
+  gfx::size_type gfx::width() const noexcept
+  {
+    return m_size.width;
+  }
+  gfx::size_type gfx::height() const noexcept
+  {
+    return m_size.height;
+  }
+
+  void gfx::bind_scaling(scale_type scale) noexcept
+  {
+    m_scale = width() / scale;
+  }
+  void gfx::set_origin(vertex_type origin) noexcept
+  {
+    m_origin = origin;
+  }
+
+  // stupid test code
+  void gfx::draw(const vertex_type& v1, const vertex_type& v2) noexcept
+  {
+    const auto cv1 = world_to_viewport(v1);
+    const auto cv2 = world_to_viewport(v2);
+    m_renderer->line(cv1, cv2);
   }
 
   // Private members
@@ -71,4 +95,9 @@ namespace engine::graphics
     return ratio_type{ m_size.width, m_size.height }.get_simplified();
   }
 
+  gfx::vertex_type gfx::world_to_viewport(const vertex_type& v) const noexcept
+  {
+    auto vView = (v - m_origin) * m_scale;
+    return vView;
+  }
 }

@@ -59,6 +59,8 @@ namespace engine::graphics
   {
   private:
     using storage_type = std::unordered_map<const gfx*, renderer>;
+    using point_type   = utils::vecd2;
+    using pixel_type   = utils::point2d;
 
   public:
     static renderer& get(const gfx* g, const window& wnd) noexcept;
@@ -81,11 +83,13 @@ namespace engine::graphics
     void end_drawing() noexcept;
 
     //stupid test code
-    void line(const utils::vecd2& v1, const utils::vecd2& v2) noexcept;
+    void line(const point_type& v1, const point_type& v2) noexcept;
 
   private:
     void init() noexcept;
     void release() noexcept;
+
+    pixel_type viewport_to_screen(const point_type& v) const noexcept;
 
   private:
     const window& m_wnd;

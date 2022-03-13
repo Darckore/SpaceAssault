@@ -6,10 +6,11 @@ namespace assault::game
   class level : public engine::world::scene
   {
   public:
-    using base_type  = engine::world::scene;
-    using time_type  = base_type::time_type;
-    using gfx_type   = base_type::gfx_type;
-    using owner_type = base_type::owner_type;
+    using base_type   = engine::world::scene;
+    using time_type   = base_type::time_type;
+    using gfx_type    = base_type::gfx_type;
+    using owner_type  = base_type::owner_type;
+    using camera_type = base_type::camera_type;
 
   public:
     CLASS_SPECIALS_NONE(level);
@@ -21,6 +22,6 @@ namespace assault::game
     virtual void render() noexcept override;
 
   private:
-
+    
   };
 }

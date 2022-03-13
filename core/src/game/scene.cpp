@@ -5,17 +5,17 @@ namespace engine::world
 {
   // Special members
 
-  scene::scene(owner_type& owner, gfx_type& g) noexcept :
+  scene::scene(owner_type& owner, camera_type cam) noexcept :
     m_owner{ owner },
-    m_gfx{ g }
+    m_cam{ cam }
   {
   }
 
   // Public members
 
-  scene::gfx_type& scene::gfx() noexcept
+  scene::camera_type& scene::camera() noexcept
   {
-    return m_gfx;
+    return m_cam;
   }
   scene::owner_type& scene::game() noexcept
   {

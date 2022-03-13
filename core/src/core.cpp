@@ -43,6 +43,7 @@ namespace engine
       return;
     }
 
+    m_game.update(time_type{});
     loop();
   }
   void core::loop() noexcept

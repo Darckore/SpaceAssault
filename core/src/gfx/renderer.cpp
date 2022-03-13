@@ -90,6 +90,41 @@ namespace engine::graphics
     SelectObject(backBufferDC, oldBuffer);
   }
 
+  namespace gdi
+  {
+    ////////////////////
+    // pen
+    ////////////////////
+    
+    class pen
+    {
+    public:
+      CLASS_SPECIALS_NODEFAULT(pen);
+
+      pen(buffer& buf, int style, int width, COLORREF c) noexcept :
+        m_pen{ CreatePen(style, width, c) },
+        m_device{ detail::device(buf) }
+      {
+        auto old = reinterpret_cast<HPEN>(SelectObject(m_device, m_pen));
+        DeleteObject(old);
+      }
+
+      ~pen() noexcept
+      {
+        DeleteObject(m_pen);
+      }
+
+      HDC device() noexcept
+      {
+        return m_device;
+      }
+
+    private:
+      HPEN m_pen{};
+      HDC m_device{};
+    };
+  }
+
   ////////////////////
   // renderer
   ////////////////////
@@ -151,18 +186,13 @@ namespace engine::graphics
   // Draw stuff
 
   // stupid test code
-  void renderer::line(const utils::vecd2& v1, const utils::vecd2& v2) noexcept
+  void renderer::line(const point_type& v1, const point_type& v2) noexcept
   {
-    auto pen = CreatePen(PS_SOLID, 5, 0x0000FF00);
-    auto device = detail::device(m_buf);
-    DeleteObject((HPEN)SelectObject(detail::device(m_buf), pen));
-
-    utils::point2d p1 = v1;
-    utils::point2d p2 = v2;
-    MoveToEx(device, p1.get<0>(), p1.get<1>(), nullptr);
-	  LineTo(device, p2.get<0>(), p2.get<1>());
-
-    DeleteObject(pen);
+    gdi::pen pen{ m_buf, PS_SOLID, 5, utils::colours::green };
+    const auto p1 = viewport_to_screen(v1);
+    const auto p2 = viewport_to_screen(v2);
+    MoveToEx(pen.device(), p1.get<0>(), p1.get<1>(), nullptr);
+    LineTo(pen.device(), p2.get<0>(), p2.get<1>());
   }
 
   // Private members
@@ -174,5 +204,14 @@ namespace engine::graphics
   void renderer::release() noexcept
   {
     m_buf.kill_buffers(m_wnd);
+  }
+
+  renderer::pixel_type renderer::viewport_to_screen(const point_type& v) const noexcept
+  {
+    using coord_t = pixel_type::value_type;
+    const auto [w, h] = m_wnd.size();
+    const auto x = static_cast<coord_t>(v.get<0>()) + w / 2;
+    const auto y = h / 2 - static_cast<coord_t>(v.get<1>());
+    return { x, y };
   }
 }

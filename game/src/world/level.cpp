@@ -5,7 +5,7 @@ namespace test_thingy
 {
   struct line
   {
-    static constexpr utils::vecd2 init{ 960.0, 270.0 };
+    static constexpr utils::vecd2 init{ 0.0, 20.0 };
     static utils::vecd2 from;
     static utils::vecd2 to;
     static double angle;
@@ -20,9 +20,12 @@ namespace test_thingy
     }
   };
 
-  utils::vecd2 line::from{ 960.0, 540.0 };
+  utils::vecd2 line::from{ 0.0, 0.0 };
   utils::vecd2 line::to{ init };
   double line::angle = 0.0;
+
+  // temporaty, controls the level chunk that should fill in the viewport
+  constexpr auto visibleSize = 40.0; // meters?
 }
 
 namespace assault::game
@@ -30,7 +33,7 @@ namespace assault::game
   // Special members
 
   level::level(owner_type& owner, gfx_type& g) noexcept :
-    base_type{ owner, g }
+    base_type{ owner, camera_type { g, test_thingy::visibleSize } }
   {
   }
 
@@ -38,6 +41,8 @@ namespace assault::game
 
   void level::update(time_type dt) noexcept
   {
+    camera().update();
+
     // stupid test code
     test_thingy::line::step(dt);
   }
@@ -45,6 +50,6 @@ namespace assault::game
   {
     // stupid test code
     using test_thingy::line;
-    gfx().draw(line::from, line::to);
+    camera().gfx().draw(line::from, line::to);
   }
 }

@@ -28,9 +28,11 @@ namespace engine::graphics
     };
 
   public:
-    using viewport_size = window::dimensions;
-    using size_type     = window::size_type;
-    using ratio_type    = utils::ratio<size_type>;
+    using viewport_size  = window::dimensions;
+    using size_type      = window::size_type;
+    using ratio_type     = utils::ratio<size_type>;
+    using vertex_type    = utils::vecd2;
+    using scale_type     = vertex_type::value_type;
 
   public:
     CLASS_SPECIALS_NONE(gfx);
@@ -43,8 +45,16 @@ namespace engine::graphics
     gfx(window& wnd) noexcept;
 
   public:
+    ratio_type aspect() const noexcept;
+    size_type width() const noexcept;
+    size_type height() const noexcept;
+
+    void bind_scaling(scale_type scale) noexcept;
+    void set_origin(vertex_type origin) noexcept;
+
+  public:
     // stupid test code
-    void draw(const utils::vecd2& v1, const utils::vecd2& v2) noexcept;
+    void draw(const vertex_type& v1, const vertex_type& v2) noexcept;
 
   private:
     void begin_frame() noexcept;
@@ -56,10 +66,14 @@ namespace engine::graphics
 
     ratio_type calc_aspect_ratio() const noexcept;
 
+    vertex_type world_to_viewport(const vertex_type& v) const noexcept;
+
   private:
     window& m_wnd;
     renderer* m_renderer;
     viewport_size m_size{};
     ratio_type m_aspect{};
+    vertex_type m_origin{};
+    scale_type m_scale{};
   };
 }
