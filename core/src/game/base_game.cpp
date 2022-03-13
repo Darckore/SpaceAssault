@@ -1,4 +1,5 @@
 #include "game/base_game.hpp"
+#include "game/scene.hpp"
 
 namespace engine
 {
@@ -15,16 +16,15 @@ namespace engine
   {
     m_engine.run();
   }
+  void base_game::quit() noexcept
+  {
+    m_engine.shutdown();
+  }
 
   // Protected members
 
   base_game::graphics_type& base_game::gfx() noexcept
   {
     return m_engine.gfx();
-  }
-
-  void base_game::quit() noexcept
-  {
-    m_engine.shutdown();
   }
 }

@@ -1,13 +1,22 @@
 #pragma once
-#include "core/core.hpp"
+#include "game/i_game.hpp"
 
 namespace engine
 {
-  class base_game
+  namespace world
+  {
+    class scene;
+  }
+
+  class base_game : public i_game
   {
   public:
-    using time_type     = core::time_type;
-    using graphics_type = core::graphics_type;
+    friend class core;
+
+  public:
+    using base_type     = i_game;
+    using time_type     = base_type::time_type;
+    using graphics_type = base_type::graphics_type;
 
   public:
     CLASS_SPECIALS_NONE_CUSTOM(base_game);
@@ -16,15 +25,15 @@ namespace engine
 
   public:
     void run() noexcept;
+    void quit() noexcept;
 
+  protected:
     virtual bool before_run() noexcept = 0;
     virtual void update(time_type dt) noexcept = 0;
     virtual void render() noexcept = 0;
 
   protected:
     graphics_type& gfx() noexcept;
-
-    void quit() noexcept;
 
   private:
     core m_engine;
