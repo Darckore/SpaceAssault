@@ -27,4 +27,13 @@ namespace engine
   {
     return m_engine.gfx();
   }
+  base_game::scene_type& base_game::scene() noexcept
+  {
+    return *m_curScene;
+  }
+
+  void base_game::switch_scene(scene_type& s) noexcept
+  {
+    m_curScene = &s;
+  }
 }

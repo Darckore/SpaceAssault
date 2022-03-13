@@ -17,6 +17,7 @@ namespace engine
     using base_type     = i_game;
     using time_type     = base_type::time_type;
     using graphics_type = base_type::graphics_type;
+    using scene_type    = world::scene;
 
   public:
     CLASS_SPECIALS_NONE_CUSTOM(base_game);
@@ -34,8 +35,12 @@ namespace engine
 
   protected:
     graphics_type& gfx() noexcept;
+    scene_type& scene() noexcept;
+
+    void switch_scene(scene_type& s) noexcept;
 
   private:
     core m_engine;
+    scene_type* m_curScene{};
   };
 }

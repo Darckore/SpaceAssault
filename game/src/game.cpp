@@ -4,33 +4,32 @@
 namespace assault::game
 {
   // stupid test code
-  static level* make_lvl(auto& owner, auto& g) noexcept
+  static level& make_lvl(auto& owner, auto& g) noexcept
   {
     static level lvl{ owner, g };
-    return &lvl;
+    return lvl;
   }
 
   // Special members
 
   game::~game() noexcept = default;
 
-  game::game() noexcept :
-    m_curScene{ make_lvl(*this, gfx()) } // stupid test code
-  {
-  }
+  game::game() noexcept = default;
 
   // Private members
 
   bool game::before_run() noexcept
   {
+    // stupid test code
+    switch_scene(make_lvl(*this, gfx()));
     return true;
   }
   void game::update(time_type dt) noexcept
   {
-    m_curScene->update(dt);
+    scene().update(dt);
   }
   void game::render() noexcept
   {
-    m_curScene->render();
+    scene().render();
   }
 }

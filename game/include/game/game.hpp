@@ -7,7 +7,7 @@ namespace assault::game
   {
   public:
     using base_type  = engine::base_game;
-    using level_type = engine::world::scene;
+    using scene_type = base_type::scene_type;
 
   public:
     CLASS_SPECIALS_NONE_CUSTOM(game);
@@ -20,8 +20,5 @@ namespace assault::game
     virtual bool before_run() noexcept override;
     virtual void update(time_type dt) noexcept override;
     virtual void render() noexcept override;
-
-  private:
-    level_type* m_curScene{};
   };
 }
