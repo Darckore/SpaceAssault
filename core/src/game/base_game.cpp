@@ -34,6 +34,12 @@ namespace engine
 
   void base_game::switch_scene(scene_type& s) noexcept
   {
+    if (!s)
+    {
+      // todo: Report error here
+      quit();
+    }
+
     m_curScene = &s;
   }
 }

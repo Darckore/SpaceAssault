@@ -52,4 +52,9 @@ namespace assault::game
     using test_thingy::line;
     camera().gfx().draw(line::from, line::to);
   }
+
+  bool level::init() noexcept
+  {
+    return true;
+  }
 }

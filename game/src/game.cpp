@@ -16,12 +16,26 @@ namespace assault::game
 
   game::game() noexcept = default;
 
+  // Public members
+
+  void game::request_quit(const scene_type& caller) noexcept
+  {
+    utils::unused(caller);
+    quit();
+  }
+
   // Private members
 
   bool game::before_run() noexcept
   {
     // stupid test code
-    switch_scene(make_lvl(*this, gfx()));
+    auto&& lvl = make_lvl(*this, gfx());
+    if (!lvl.load())
+    {
+      return false;
+    }
+
+    switch_scene(lvl);
     return true;
   }
   void game::update(time_type dt) noexcept

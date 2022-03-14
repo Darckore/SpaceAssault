@@ -22,6 +22,6 @@ namespace assault::game
     virtual void render() noexcept override;
 
   private:
-    
+    virtual bool init() noexcept override;
   };
 }
