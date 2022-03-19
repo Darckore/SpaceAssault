@@ -4,7 +4,7 @@ namespace engine::config
 {
   // Special members
 
-  cfg::cfg(fname_type fname) noexcept :
+  cfg::cfg(file_name fname) noexcept :
     m_file{ fname }
   {
     read();
@@ -19,11 +19,17 @@ namespace engine::config
 
   void cfg::read() noexcept
   {
-    while (m_file)
+    if (!parse())
     {
-      auto l = m_file.line();
-      utils::unused(l);
+      m_file.discard();
+      return;
     }
+
+    m_file.rewind();
   }
 
+  bool cfg::parse() noexcept
+  {
+    return true;
+  }
 }

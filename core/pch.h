@@ -2,6 +2,7 @@
 
 // std headers we'll most likely be using
 #include <type_traits>
+#include <concepts>
 #include <utility>
 #include <source_location>
 
@@ -17,6 +18,9 @@
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
+
+#include <optional>
+#include <variant>
 
 #include <filesystem>
 #include <memory>

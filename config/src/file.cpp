@@ -22,6 +22,11 @@ namespace engine::config
   {
     m_cur = m_buf.begin();
   }
+  void cfg_file::discard() noexcept
+  {
+    m_buf.clear();
+    m_cur = m_buf.end();
+  }
 
   cfg_file::line_type cfg_file::line() noexcept
   {

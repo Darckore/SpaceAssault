@@ -1,24 +1,32 @@
 #pragma once
 #include "config/file.hpp"
+#include "options/section.hpp"
 
 namespace engine::config
 {
   class cfg
   {
   public:
-    using fname_type = cfg_file::name_type;
+    using file_type  = cfg_file;
+    using file_name  = file_type::name_type;
+    using line_type  = file_type::line_type;
+    using name_type  = section::name_type;
+
+    using sections = std::unordered_map<name_type, section>;
 
   public:
     CLASS_SPECIALS_NODEFAULT_NOCOPY(cfg);
 
-    explicit cfg(fname_type fname) noexcept;
+    explicit cfg(file_name fname) noexcept;
 
     explicit operator bool() const noexcept;
 
   private:
     void read() noexcept;
+    bool parse() noexcept;
 
   private:
-    cfg_file m_file;
+    file_type m_file;
+    sections  m_sections;
   };
 }

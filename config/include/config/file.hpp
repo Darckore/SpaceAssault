@@ -21,6 +21,8 @@ namespace engine::config
 
   public:
     void rewind() noexcept;
+    void discard() noexcept;
+
     line_type line() noexcept;
 
   private:
