@@ -52,11 +52,7 @@ namespace engine::config
     template <detail::val_type T>
     auto try_get() noexcept
     {
-      if (is<T>())
-        return &get<T>();
-
-      using ret_t = T*;
-      return ret_t{};
+      return std::get_if<T>(&m_val);
     }
 
   private:
