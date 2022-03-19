@@ -12,16 +12,31 @@ namespace engine::graphics
 
   // Special members
 
-  camera::camera(gfx_type& g, dist_type fs) noexcept :
-    m_gfx{ &g },
-    m_fieldSize{ fs }
+  camera::camera(gfx_type& g) noexcept :
+    m_gfx{ &g }
   {
+  }
+
+  camera::operator bool() const noexcept
+  {
+    return !utils::eq(m_fieldSize, dist_type{});
   }
 
   // Public members
 
+  void camera::resize(dist_type fieldSize) noexcept
+  {
+    m_fieldSize = fieldSize;
+  }
+
   void camera::update() noexcept
   {
+    if (!*this)
+    {
+      // Report error
+      return;
+    }
+
     using detail::norm;
     const auto gfxAspect = gfx().aspect();
     if (gfxAspect == m_aspect)

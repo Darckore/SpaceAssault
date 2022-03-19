@@ -37,7 +37,7 @@ namespace engine
     graphics_type& gfx() noexcept;
     scene_type& scene() noexcept;
 
-    void switch_scene(scene_type& s) noexcept;
+    bool switch_scene(scene_type& s) noexcept;
 
   private:
     core m_engine;

@@ -1,4 +1,5 @@
 #include "world/level.hpp"
+#include "config/conf.hpp"
 
 // stupid test code
 namespace test_thingy
@@ -33,7 +34,7 @@ namespace assault::game
   // Special members
 
   level::level(owner_type& owner, gfx_type& g) noexcept :
-    base_type{ owner, camera_type { g, test_thingy::visibleSize } }
+    base_type{ owner, camera_type { g } }
   {
   }
 
@@ -41,7 +42,15 @@ namespace assault::game
 
   void level::update(time_type dt) noexcept
   {
-    camera().update();
+    if (auto&& cam = camera())
+    {
+      camera().update();
+    }
+    else
+    {
+      err_and_quit();
+      return;
+    }
 
     // stupid test code
     test_thingy::line::step(dt);
@@ -55,6 +64,11 @@ namespace assault::game
 
   bool level::init() noexcept
   {
+    // stupid test code
+    cfg_type cfg{ "data/levels/test_lvl.lvl" };
+    utils::unused(cfg);
+
+    camera().resize(test_thingy::visibleSize);
     return true;
   }
 }

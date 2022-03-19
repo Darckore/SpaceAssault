@@ -11,6 +11,7 @@ namespace assault::game
     using gfx_type    = base_type::gfx_type;
     using owner_type  = base_type::owner_type;
     using camera_type = base_type::camera_type;
+    using cfg_type    = base_type::cfg_type;
 
   public:
     CLASS_SPECIALS_NONE(level);

@@ -13,9 +13,13 @@ namespace engine::graphics
   public:
     CLASS_SPECIALS_NODEFAULT(camera);
 
-    camera(gfx_type& g, dist_type fs) noexcept;
+    explicit camera(gfx_type& g) noexcept;
+
+    explicit operator bool() const noexcept;
 
   public:
+    void resize(dist_type fieldSize) noexcept;
+
     void update() noexcept;
 
   public: // eventually private

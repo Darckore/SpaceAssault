@@ -2,6 +2,11 @@
 #include "game/base_game.hpp"
 #include "gfx/camera.hpp"
 
+namespace engine::config
+{
+  class cfg;
+}
+
 namespace engine::world
 {
   class scene
@@ -19,6 +24,7 @@ namespace engine::world
     using gfx_type    = owner_type::graphics_type;
     using time_type   = owner_type::time_type;
     using camera_type = graphics::camera;
+    using cfg_type    = config::cfg;
 
   public:
     CLASS_SPECIALS_NONE(scene);
@@ -41,6 +47,9 @@ namespace engine::world
     owner_type& game() noexcept;
 
     bool load() noexcept;
+
+  protected:
+    void err_and_quit() noexcept;
 
   private:
     void loading() noexcept;

@@ -45,6 +45,14 @@ namespace engine::world
     return true;
   }
 
+  // Protected members
+
+  void scene::err_and_quit() noexcept
+  {
+    error();
+    m_owner.request_quit(*this);
+  }
+
   // Private members
 
   void scene::loading() noexcept

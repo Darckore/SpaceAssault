@@ -35,8 +35,7 @@ namespace assault::game
       return false;
     }
 
-    switch_scene(lvl);
-    return true;
+    return switch_scene(lvl);
   }
   void game::update(time_type dt) noexcept
   {
