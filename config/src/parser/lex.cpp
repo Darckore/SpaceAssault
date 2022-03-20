@@ -94,6 +94,7 @@ namespace config
       break;
     }
 
+    discard();
     return {};
   }
 
@@ -200,7 +201,6 @@ namespace config
   }
   void lex::discard() noexcept
   {
-    m_file.discard();
     m_from = m_file.end();
     m_to   = m_file.end();
   }
