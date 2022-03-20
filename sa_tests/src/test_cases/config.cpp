@@ -45,9 +45,47 @@ TEST(config, t_section_add_get)
   EXPECT_TRUE(dummy.parent() == &s);
 }
 
-TEST(config, t_section_opts)
+TEST(config, t_option_add_get)
 {
   section s{ "glob"sv };
+
+  constexpr auto optName  = "neko"sv;
+  constexpr auto intVal   = 10;
+  constexpr auto boolVal  = false;
+  constexpr auto floatVal = 42.69;
+  constexpr auto strVal   = "kitty"sv;
+  
+  auto&& opt = s.add_option(optName);
+  EXPECT_TRUE(s.has_option(optName));
+
+  opt.add_value(intVal);
+  opt.add_value(boolVal);
+  opt.add_value(floatVal);
+  opt.add_value(strVal);
+
+  const auto& optAdd = s.add_option(optName);
+  ASSERT_EQ(optAdd.size(), 4);
+
+  auto ip = optAdd[0].try_get<value::int_val>();
+  ASSERT_TRUE(ip);
+  EXPECT_EQ(*ip, intVal);
+
+  auto bp = optAdd[1].try_get<value::bool_val>();
+  ASSERT_TRUE(bp);
+  EXPECT_EQ(*bp, boolVal);
+
+  auto fp = optAdd[2].try_get<value::float_val>();
+  ASSERT_TRUE(fp);
+  EXPECT_DOUBLE_EQ(*fp, floatVal);
+
+  auto sp = optAdd[3].try_get<value::str_val>();
+  ASSERT_TRUE(sp);
+  EXPECT_EQ(*sp, strVal);
+
+  EXPECT_EQ((opt[0].get<value::int_val>()), intVal);
+  EXPECT_EQ((opt[1].get<value::bool_val>()), boolVal);
+  EXPECT_DOUBLE_EQ((opt[2].get<value::float_val>()), floatVal);
+  EXPECT_EQ((opt[3].get<value::str_val>()), strVal);
 }
 
 TEST(conf_file, t_bad)

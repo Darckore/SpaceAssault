@@ -44,15 +44,25 @@ namespace engine::config
     }
 
     template <detail::val_type T>
-    auto& get() noexcept
+    const auto& get() const noexcept
     {
       return std::get<T>(m_val);
     }
+    template <detail::val_type T>
+    auto& get() noexcept
+    {
+      return utils::mutate(std::as_const(*this).get<T>());
+    }
 
+    template <detail::val_type T>
+    auto try_get() const noexcept
+    {
+      return std::get_if<T>(&m_val);
+    }
     template <detail::val_type T>
     auto try_get() noexcept
     {
-      return std::get_if<T>(&m_val);
+      return utils::mutate(std::as_const(*this).try_get<T>());
     }
 
   private:
