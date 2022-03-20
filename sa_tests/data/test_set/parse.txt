@@ -1,4 +1,5 @@
 .section
+{
   intp{ 42 }
   intn{ -42 }
   floatp{ 69.5 }
@@ -7,6 +8,11 @@
   boolf{ false }
 
   .subsection
+  {
     str{ 'hi' }
+  }
+}
 
 .another
+{
+}
