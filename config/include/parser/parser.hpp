@@ -1,5 +1,5 @@
 #pragma once
-#include "config/file.hpp"
+#include "parser/lex.hpp"
 #include "options/section.hpp"
 
 namespace config
@@ -12,8 +12,7 @@ namespace config
   public:
     using value_type = section;
     using value_opt  = std::optional<value_type>;
-    using line_type  = cfg_file::line_type;
-    using size_type  = line_type::size_type;
+    using size_type  = lex::size_type;
 
   public:
     CLASS_SPECIALS_NONE(parser);
@@ -29,7 +28,7 @@ namespace config
     bool parse() noexcept;
 
   private:
-    cfg_file& m_file;
+    lex m_lexer;
     value_opt m_res;
     value_type* m_curRoot{};
   };

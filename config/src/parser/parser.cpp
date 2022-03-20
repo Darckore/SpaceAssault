@@ -5,7 +5,7 @@ namespace config
   // Special members
 
   parser::parser(cfg_file& file) noexcept :
-    m_file{ file },
+    m_lexer{ file },
     m_res{ root_name },
     m_curRoot{ &*m_res }
   {
@@ -29,6 +29,11 @@ namespace config
 
   bool parser::parse() noexcept
   {
+    while (m_lexer)
+    {
+
+    }
+
     return true;
   }
 }

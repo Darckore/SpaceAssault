@@ -1,4 +1,5 @@
 #include "config/conf.hpp"
+#include "parser/lex.hpp"
 using namespace config;
 
 TEST(conf, t_option)
@@ -112,7 +113,7 @@ TEST(conf_file, t_good)
   *****************************************/
   
   cfg_file f{ fname };
-  EXPECT_TRUE(f);
+  ASSERT_TRUE(f);
 
   auto line = f.line();
   EXPECT_EQ(line, ".section");
@@ -124,6 +125,46 @@ TEST(conf_file, t_good)
   EXPECT_EQ(line, "  option{ after_empty }");
 
   EXPECT_FALSE(f);
+}
+
+TEST(conf_lex, t_good)
+{
+  constexpr auto fname = "data/test_set/lex_good.txt"sv;
+  using token = lex::token;
+
+  // .section { option { 1, -42, +6.9, 'string value', true, false } }
+
+  cfg_file f{ fname };
+  ASSERT_TRUE(f);
+
+  lex l{ f };
+
+  auto check = [&l](std::string_view str, token::token_id id)
+  {
+    auto tok = l.next();
+    ASSERT_TRUE(tok.is(id));
+    ASSERT_EQ(tok.value, str);
+  };
+
+  check(".section"sv,       token::section);
+  check("{"sv,              token::curlyOpen);
+  check("option"sv,         token::identifier);
+  check("{"sv,              token::curlyOpen);
+  check("1"sv,              token::intNum);
+  check(","sv,              token::comma);
+  check("-42"sv,            token::intNum);
+  check(","sv,              token::comma);
+  check("+6.9"sv,           token::floatNum);
+  check(","sv,              token::comma);
+  check("'string value'"sv, token::str);
+  check(","sv,              token::comma);
+  check("true"sv,           token::boolTrue);
+  check(","sv,              token::comma);
+  check("false"sv,          token::boolFalse);
+  check("}"sv,              token::curlyClose);
+  check("}"sv,              token::curlyClose);
+
+  EXPECT_TRUE(!l);
 }
 
 TEST(conf_parser, t_parse)

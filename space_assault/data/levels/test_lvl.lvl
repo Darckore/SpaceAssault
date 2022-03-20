@@ -1,6 +1,6 @@
 .level
 {
-  name{ test }
+  name{ 'test' }
   camera{ 0, 0, 40 }
 }
 

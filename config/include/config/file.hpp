@@ -22,11 +22,22 @@ namespace config
 
   public:
     void rewind() noexcept;
+    line_type consume(iterator upto) noexcept;
+
     void discard() noexcept;
 
     line_type line() noexcept;
 
-    char_type peek() const noexcept;
+    char_type peek() noexcept;
+
+    auto begin() const noexcept
+    {
+      return m_cur;
+    }
+    auto end() const noexcept
+    {
+      return m_buf.end();
+    }
 
   private:
     void read() noexcept;

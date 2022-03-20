@@ -7,6 +7,6 @@
   boolf{ false }
 
   .subsection
-    str{ hi }
+    str{ 'hi' }
 
 .another

@@ -22,6 +22,13 @@ namespace config
   {
     m_cur = m_buf.begin();
   }
+  cfg_file::line_type cfg_file::consume(iterator upto) noexcept
+  {
+    auto ret = line_type{ m_cur, upto };
+    m_cur = upto;
+    return ret;
+  }
+
   void cfg_file::discard() noexcept
   {
     m_buf.clear();
@@ -52,14 +59,22 @@ namespace config
     return res;
   }
 
-  cfg_file::char_type cfg_file::peek() const noexcept
+  cfg_file::char_type cfg_file::peek() noexcept
   {
     auto it = m_cur;
     while (it != m_buf.end())
     {
       if (const auto c = *it; !std::isspace(c))
+      {
+        m_cur = it;
         return c;
+      }
+
+      ++it;
     }
+
+    if (it == m_buf.end())
+      m_cur = it;
 
     return char_type{};
   }
