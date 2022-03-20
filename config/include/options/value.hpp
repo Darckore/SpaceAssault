@@ -1,6 +1,6 @@
 #pragma once
 
-namespace engine::config
+namespace config
 {
   namespace detail
   {

@@ -1,6 +1,6 @@
 #include "config/file.hpp"
 
-namespace engine::config
+namespace config
 {
   // Special members
 

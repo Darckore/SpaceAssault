@@ -1,6 +1,6 @@
 #include "options/section.hpp"
 
-namespace engine::config
+namespace config
 {
   // Special members
   section::section(name_type name) noexcept :

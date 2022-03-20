@@ -2,7 +2,7 @@
 #include "config/file.hpp"
 #include "options/section.hpp"
 
-namespace engine::config
+namespace config
 {
   class cfg
   {

@@ -1,7 +1,7 @@
 #include "config/conf.hpp"
-using namespace engine::config;
+using namespace config;
 
-TEST(config, t_option)
+TEST(conf, t_option)
 {
   section s{ "empty"sv };
 
@@ -21,7 +21,7 @@ TEST(config, t_option)
   EXPECT_EQ(10, (val.get<value::int_val>()));
 }
 
-TEST(config, t_section_add_get)
+TEST(conf, t_section_add_get)
 {
   section s{ "glob"sv };
 
@@ -45,7 +45,7 @@ TEST(config, t_section_add_get)
   EXPECT_TRUE(dummy.parent() == &s);
 }
 
-TEST(config, t_option_add_get)
+TEST(conf, t_option_add_get)
 {
   section s{ "glob"sv };
 

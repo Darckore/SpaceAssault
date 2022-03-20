@@ -2,7 +2,7 @@
 #include "game/base_game.hpp"
 #include "gfx/camera.hpp"
 
-namespace engine::config
+namespace config
 {
   class cfg;
 }

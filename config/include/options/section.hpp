@@ -1,7 +1,7 @@
 #pragma once
 #include "options/option.hpp"
 
-namespace engine::config
+namespace config
 {
   class section
   {
