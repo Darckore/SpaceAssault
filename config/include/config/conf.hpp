@@ -12,8 +12,6 @@ namespace engine::config
     using line_type  = file_type::line_type;
     using name_type  = section::name_type;
 
-    using sections = std::unordered_map<name_type, section>;
-
   public:
     CLASS_SPECIALS_NODEFAULT_NOCOPY(cfg);
 
@@ -27,6 +25,6 @@ namespace engine::config
 
   private:
     file_type m_file;
-    sections  m_sections;
+    section   m_root;
   };
 }

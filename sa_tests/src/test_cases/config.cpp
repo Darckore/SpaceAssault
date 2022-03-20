@@ -21,7 +21,36 @@ TEST(config, t_option)
   EXPECT_EQ(10, (val.get<value::int_val>()));
 }
 
-TEST(config, t_file_bad)
+TEST(config, t_section_add_get)
+{
+  section s{ "glob"sv };
+
+  constexpr auto name1 = "dummy"sv;
+  auto&& dummy = s.add_section(name1);
+  EXPECT_TRUE(s.has_section(name1));
+
+  auto&& anotherDummy = s.add_section(name1);
+  EXPECT_TRUE(&dummy == &anotherDummy);
+
+  auto dummyLookup = s.get_section(name1);
+  EXPECT_TRUE(dummyLookup == &dummy);
+
+  const auto& sref = s;
+  auto dummyConstLookup = sref.get_section(name1);
+  EXPECT_TRUE(dummyConstLookup == &dummy);
+
+  EXPECT_TRUE(s.is_root());
+  EXPECT_FALSE(dummy.is_root());
+  
+  EXPECT_TRUE(dummy.parent() == &s);
+}
+
+TEST(config, t_section_opts)
+{
+  section s{ "glob"sv };
+}
+
+TEST(conf_file, t_bad)
 {
   constexpr auto fname  = "derp.txt"sv;
 
@@ -30,7 +59,7 @@ TEST(config, t_file_bad)
   EXPECT_TRUE(f.line().empty());
 }
 
-TEST(config, t_file_good)
+TEST(conf_file, t_good)
 {
   constexpr auto fname = "data/test_set/section.txt"sv;
 
@@ -59,7 +88,7 @@ TEST(config, t_file_good)
   EXPECT_FALSE(f);
 }
 
-TEST(config, t_parse)
+TEST(conf_parser, t_parse)
 {
   constexpr auto fname = "data/test_set/parse.txt"sv;
 

@@ -5,7 +5,8 @@ namespace engine::config
   // Special members
 
   cfg::cfg(file_name fname) noexcept :
-    m_file{ fname }
+    m_file{ fname },
+    m_root{ "~" }
   {
     read();
   }
