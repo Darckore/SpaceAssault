@@ -1,5 +1,9 @@
 .level
+{
   name{ test }
   camera{ 0, 0, 40 }
+}
 
 .assets
+{
+}

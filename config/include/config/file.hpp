@@ -7,6 +7,7 @@ namespace config
   public:
     using name_type   = std::string_view;
     using line_type   = std::string_view;
+    using char_type   = line_type::value_type;
     using in_type     = std::ifstream;
     using out_type    = std::ofstream;
     using buf_type    = std::string;
@@ -24,6 +25,8 @@ namespace config
     void discard() noexcept;
 
     line_type line() noexcept;
+
+    char_type peek() const noexcept;
 
   private:
     void read() noexcept;

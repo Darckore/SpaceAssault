@@ -1,4 +1,5 @@
 #include "config/conf.hpp"
+#include "parser/parser.hpp"
 
 namespace config
 {
@@ -6,7 +7,7 @@ namespace config
 
   cfg::cfg(file_name fname) noexcept :
     m_file{ fname },
-    m_root{ "~" }
+    m_root{ parser::root_name }
   {
     read();
   }
@@ -31,6 +32,11 @@ namespace config
 
   bool cfg::parse() noexcept
   {
-    return true;
+    if (parser p{ m_file })
+    {
+      m_root = p.get();
+      return true;
+    }
+    return false;
   }
 }

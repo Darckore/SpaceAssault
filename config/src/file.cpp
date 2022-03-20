@@ -52,6 +52,18 @@ namespace config
     return res;
   }
 
+  cfg_file::char_type cfg_file::peek() const noexcept
+  {
+    auto it = m_cur;
+    while (it != m_buf.end())
+    {
+      if (const auto c = *it; !std::isspace(c))
+        return c;
+    }
+
+    return char_type{};
+  }
+
   // Private members
 
   void cfg_file::read() noexcept
