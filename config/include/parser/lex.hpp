@@ -39,11 +39,19 @@ namespace config
         return id == i;
       }
 
+      tok_value postproc_val() const noexcept
+      {
+        return lex::unwrap(*this);
+      }
+
       tok_value value;
       token_id id{ unknown };
 
       using enum token_id;
     };
+
+  public:
+    static tok_value unwrap(token tok) noexcept;
 
   public:
     CLASS_SPECIALS_NONE(lex);
@@ -54,6 +62,7 @@ namespace config
 
   public:
     token next() noexcept;
+    void discard() noexcept;
 
   private:
     using tok_id = token::token_id;
@@ -66,7 +75,6 @@ namespace config
     bool string_val() noexcept;
 
     bool good() const noexcept;
-    void discard() noexcept;
     void fpeek() noexcept;
     token consume(token::token_id id) noexcept;
 

@@ -6,9 +6,10 @@ namespace config
   class section
   {
   public:
-    using name_type = option::name_type;
-    using opt_store = std::unordered_map<name_type, option>;
-    using sec_store = std::unordered_map<name_type, section>;
+    using name_type  = option::name_type;
+    using value_type = option;
+    using opt_store  = std::unordered_map<name_type, value_type>;
+    using sec_store  = std::unordered_map<name_type, section>;
 
   public:
     CLASS_SPECIALS_NODEFAULT_NOCOPY(section);

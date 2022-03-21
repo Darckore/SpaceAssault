@@ -218,8 +218,10 @@ TEST(conf_lex, t_bad3)
 
 TEST(conf_parser, t_parse)
 {
-  //constexpr auto fname = "data/test_set/parse.txt"sv;
+  constexpr auto fname = "data/test_set/parse_opt1.txt"sv;
 
-  //cfg c{ fname };
-  //EXPECT_TRUE(c);
+  cfg c{ fname };
+  ASSERT_TRUE(c);
+
+
 }

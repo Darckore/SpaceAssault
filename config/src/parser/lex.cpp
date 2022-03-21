@@ -27,6 +27,24 @@ namespace config
     {
       return utils::eq_any(c, plus, minus) || std::isdigit(c);
     }
+    constexpr auto is_delimiter(char_type c) noexcept
+    {
+      return utils::eq_any(c, comma, cOpen, cClose) ||
+             std::isspace(c);
+    }
+  }
+
+  // Statics
+
+  lex::tok_value lex::unwrap(token tok) noexcept
+  {
+    if (tok.is(token::section))
+      return utils::ltrim(tok.value, detail::dot);
+
+    if (tok.is(token::str))
+      return utils::trim(tok.value, detail::quote);
+
+    return tok.value;
   }
 
   // Special members
@@ -97,6 +115,11 @@ namespace config
     discard();
     return {};
   }
+  void lex::discard() noexcept
+  {
+    m_from = m_file.end();
+    m_to   = m_file.end();
+  }
 
   // Private members
 
@@ -110,7 +133,7 @@ namespace config
     {
       const auto c = *m_to;
 
-      if (c == detail::comma || std::isspace(c))
+      if (detail::is_delimiter(c))
         break;
 
       if (!detail::is_id_char(c))
@@ -135,7 +158,7 @@ namespace config
     {
       const auto c = *m_to;
 
-      if (std::isspace(c) || c == detail::comma)
+      if (detail::is_delimiter(c))
         break;
 
       if (c == detail::dot)
@@ -198,11 +221,6 @@ namespace config
   bool lex::good() const noexcept
   {
     return m_to != m_file.end();
-  }
-  void lex::discard() noexcept
-  {
-    m_from = m_file.end();
-    m_to   = m_file.end();
   }
   void lex::fpeek() noexcept
   {

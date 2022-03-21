@@ -1,0 +1,4 @@
+.section
+{
+  intp{ 42 }
+}

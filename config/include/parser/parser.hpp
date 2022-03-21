@@ -10,9 +10,11 @@ namespace config
     static constexpr auto root_name = "~"sv;
 
   public:
-    using value_type = section;
-    using value_opt  = std::optional<value_type>;
-    using size_type  = lex::size_type;
+    using value_type  = section;
+    using option_type = value_type::value_type;
+    using value_opt   = std::optional<value_type>;
+    using size_type   = lex::size_type;
+    using token_type  = lex::token;
 
   public:
     CLASS_SPECIALS_NONE(parser);
@@ -22,14 +24,25 @@ namespace config
     explicit operator bool() const noexcept;
 
   public:
-    section get() noexcept;
+    value_type get() noexcept;
 
   private:
+    token_type body() noexcept;
+    token_type body(option_type& opt) noexcept;
+
+    bool section_body(value_type& root) noexcept;
+    bool section(token_type token) noexcept;
+
+    bool option_values(option_type& opt) noexcept;
+    bool option(token_type token) noexcept;
+    
+    bool parse(token_type token) noexcept;
+
     bool parse() noexcept;
 
   private:
     lex m_lexer;
     value_opt m_res;
-    value_type* m_curRoot{};
+    value_type* m_root{};
   };
 }
