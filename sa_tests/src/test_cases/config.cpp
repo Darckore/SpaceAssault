@@ -220,6 +220,23 @@ TEST(conf_parser, t_parse)
 {
   constexpr auto fname = "data/test_set/parse_opt1.txt"sv;
 
+  /****************************************
+  * 
+  *     |.section
+  *     |{
+  *     |  intp{ 42 }
+  *     |  intn{ -42 }
+  *     |  floatp{ 69.5 }
+  *     |  floatn{ -69.5 }
+  *     |  boolt{ true }
+  *     |  boolf{ false }
+  *     |  str{ 'hi there' }
+  *     |
+  *     |  mult{ 1, 2.0, 'three', true }
+  *     |}
+  * 
+  *****************************************/
+
   cfg c{ fname };
   ASSERT_TRUE(c);
 

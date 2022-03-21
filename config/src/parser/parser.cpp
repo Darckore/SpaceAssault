@@ -98,20 +98,26 @@ namespace config
     while (m_lexer)
     {
       token = m_lexer.next();
+      if (commaExpected && !token.is(token_type::comma))
+        break;
+
       switch (token.id)
       {
       case token_type::boolTrue:
         opt.add_value(true);
+        commaExpected = true;
         continue;
 
       case token_type::boolFalse:
         opt.add_value(false);
+        commaExpected = true;
         continue;
 
       case token_type::intNum:
         if (auto iv = detail::to_int(token.value))
         {
           opt.add_value(*iv);
+          commaExpected = true;
           continue;
         }
         break;
@@ -120,12 +126,14 @@ namespace config
         if (auto fv = detail::to_float(token.value))
         {
           opt.add_value(*fv);
+          commaExpected = true;
           continue;
         }
         break;
 
       case token_type::str:
         opt.add_value(token.postproc_val());
+        commaExpected = true;
         continue;
       
       case token_type::comma:
@@ -173,6 +181,7 @@ namespace config
 
   bool parser::option_values(option_type& opt) noexcept
   {
+    BREAK(opt.name() == "mult");
     if (!detail::is_open_brace(m_lexer))
       return false;
 
