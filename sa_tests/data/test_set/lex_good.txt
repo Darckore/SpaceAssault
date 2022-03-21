@@ -1,5 +1,5 @@
 .section { 
-    option {
+    option1 {
       1, -42, +6.9, 'string value', true, false
     }
   }

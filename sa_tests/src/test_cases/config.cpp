@@ -142,7 +142,7 @@ TEST(conf_lex, t_good)
 {
   constexpr auto fname = "data/test_set/lex_good.txt"sv;
 
-  // .section { option { 1, -42, +6.9, 'string value', true, false } }
+  // .section { option1 { 1, -42, +6.9, 'string value', true, false } }
 
   cfg_file f{ fname };
   ASSERT_TRUE(f);
@@ -151,7 +151,7 @@ TEST(conf_lex, t_good)
 
   test_detail::check_token(l, ".section"sv,       token::section);
   test_detail::check_token(l, "{"sv,              token::curlyOpen);
-  test_detail::check_token(l, "option"sv,         token::identifier);
+  test_detail::check_token(l, "option1"sv,        token::identifier);
   test_detail::check_token(l, "{"sv,              token::curlyOpen);
   test_detail::check_token(l, "1"sv,              token::intNum);
   test_detail::check_token(l, ","sv,              token::comma);
