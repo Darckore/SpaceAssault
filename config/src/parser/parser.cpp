@@ -181,7 +181,6 @@ namespace config
 
   bool parser::option_values(option_type& opt) noexcept
   {
-    BREAK(opt.name() == "mult");
     if (!detail::is_open_brace(m_lexer))
       return false;
 
