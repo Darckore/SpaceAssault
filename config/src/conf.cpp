@@ -17,6 +17,11 @@ namespace config
     return static_cast<bool>(m_file);
   }
 
+  const section* cfg::operator->() const noexcept
+  {
+    return &m_root;
+  }
+
   // Private members
 
   void cfg::read() noexcept

@@ -11,6 +11,38 @@ namespace test_detail
     ASSERT_TRUE(tok.is(id));
     ASSERT_EQ(tok.value, str);
   }
+
+  auto get_option(const section& s, std::string_view name)
+  {
+    auto ret = s.get_option(name);
+    auto check = [ret, name]()
+    {
+      ASSERT_TRUE(ret);
+      ASSERT_EQ(name, ret->name());
+    };
+
+    check();
+    return ret;
+  }
+
+  template <typename T>
+  void check_opt_value(const option& opt, std::size_t size, std::size_t idx, T expected)
+  {
+    ASSERT_EQ(size, opt.size());
+    ASSERT_LT(idx, size);
+
+    auto v = opt[idx].try_get<T>();
+    ASSERT_TRUE(v);
+    
+    if constexpr (std::is_floating_point_v<T>)
+    {
+      ASSERT_DOUBLE_EQ(*v, expected);
+    }
+    else
+    {
+      ASSERT_EQ(*v, expected);
+    }
+  }
 }
 
 TEST(conf, t_option)
@@ -149,23 +181,25 @@ TEST(conf_lex, t_good)
 
   lex l{ f };
 
-  test_detail::check_token(l, ".section"sv,       token::section);
-  test_detail::check_token(l, "{"sv,              token::curlyOpen);
-  test_detail::check_token(l, "option1"sv,        token::identifier);
-  test_detail::check_token(l, "{"sv,              token::curlyOpen);
-  test_detail::check_token(l, "1"sv,              token::intNum);
-  test_detail::check_token(l, ","sv,              token::comma);
-  test_detail::check_token(l, "-42"sv,            token::intNum);
-  test_detail::check_token(l, ","sv,              token::comma);
-  test_detail::check_token(l, "+6.9"sv,           token::floatNum);
-  test_detail::check_token(l, ","sv,              token::comma);
-  test_detail::check_token(l, "'string value'"sv, token::str);
-  test_detail::check_token(l, ","sv,              token::comma);
-  test_detail::check_token(l, "true"sv,           token::boolTrue);
-  test_detail::check_token(l, ","sv,              token::comma);
-  test_detail::check_token(l, "false"sv,          token::boolFalse);
-  test_detail::check_token(l, "}"sv,              token::curlyClose);
-  test_detail::check_token(l, "}"sv,              token::curlyClose);
+  using test_detail::check_token;
+
+  check_token(l, ".section"sv,       token::section);
+  check_token(l, "{"sv,              token::curlyOpen);
+  check_token(l, "option1"sv,        token::identifier);
+  check_token(l, "{"sv,              token::curlyOpen);
+  check_token(l, "1"sv,              token::intNum);
+  check_token(l, ","sv,              token::comma);
+  check_token(l, "-42"sv,            token::intNum);
+  check_token(l, ","sv,              token::comma);
+  check_token(l, "+6.9"sv,           token::floatNum);
+  check_token(l, ","sv,              token::comma);
+  check_token(l, "'string value'"sv, token::str);
+  check_token(l, ","sv,              token::comma);
+  check_token(l, "true"sv,           token::boolTrue);
+  check_token(l, ","sv,              token::comma);
+  check_token(l, "false"sv,          token::boolFalse);
+  check_token(l, "}"sv,              token::curlyClose);
+  check_token(l, "}"sv,              token::curlyClose);
 
   EXPECT_TRUE(!l);
 }
@@ -179,7 +213,9 @@ TEST(conf_lex, t_bad1)
 
   lex l{ f };
 
-  test_detail::check_token(l, {}, token::unknown);
+  using test_detail::check_token;
+
+  check_token(l, {}, token::unknown);
   EXPECT_TRUE(!l);
 }
 
@@ -192,8 +228,10 @@ TEST(conf_lex, t_bad2)
 
   lex l{ f };
 
-  test_detail::check_token(l, ".section"sv, token::section);
-  test_detail::check_token(l, {},           token::unknown);
+  using test_detail::check_token;
+
+  check_token(l, ".section"sv, token::section);
+  check_token(l, {},           token::unknown);
   EXPECT_TRUE(!l);
 }
 
@@ -206,39 +244,66 @@ TEST(conf_lex, t_bad3)
 
   lex l{ f };
 
-  test_detail::check_token(l, ".section"sv,       token::section);
-  test_detail::check_token(l, "{"sv,              token::curlyOpen);
-  test_detail::check_token(l, "option"sv,         token::identifier);
-  test_detail::check_token(l, "{"sv,              token::curlyOpen);
-  test_detail::check_token(l, "1"sv,              token::intNum);
-  test_detail::check_token(l, ","sv,              token::comma);
-  test_detail::check_token(l, {},                 token::unknown);
+  using test_detail::check_token;
+
+  check_token(l, ".section"sv,       token::section);
+  check_token(l, "{"sv,              token::curlyOpen);
+  check_token(l, "option"sv,         token::identifier);
+  check_token(l, "{"sv,              token::curlyOpen);
+  check_token(l, "1"sv,              token::intNum);
+  check_token(l, ","sv,              token::comma);
+  check_token(l, {},                 token::unknown);
   EXPECT_TRUE(!l);
 }
 
-TEST(conf_parser, t_parse)
+TEST(conf_parser, t_opts)
 {
   constexpr auto fname = "data/test_set/parse_opt1.txt"sv;
-
-  /****************************************
-  * 
-  *     |.section
-  *     |{
-  *     |  intp{ 42 }
-  *     |  intn{ -42 }
-  *     |  floatp{ 69.5 }
-  *     |  floatn{ -69.5 }
-  *     |  boolt{ true }
-  *     |  boolf{ false }
-  *     |  str{ 'hi there' }
-  *     |
-  *     |  mult{ 1, 2.0, 'three', true }
-  *     |}
-  * 
-  *****************************************/
 
   cfg c{ fname };
   ASSERT_TRUE(c);
 
+  //.section
+  auto sec = c->get_section("section"sv);
+  ASSERT_TRUE(sec);
 
+  const option* opt{};
+
+  using test_detail::get_option;
+  using test_detail::check_opt_value;
+
+  //intp{ 42 }
+  opt = get_option(*sec, "intp"sv);
+  check_opt_value(*opt, 1, 0, 42ll);
+
+  //intn{ -42 }
+  opt = get_option(*sec, "intn"sv);
+  check_opt_value(*opt, 1, 0, -42ll);
+
+  //floatp{ 69.5 }
+  opt = get_option(*sec, "floatp"sv);
+  check_opt_value(*opt, 1, 0, 69.5);
+
+  //floatn{ -69.5 }
+  opt = get_option(*sec, "floatn"sv);
+  check_opt_value(*opt, 1, 0, -69.5);
+
+  //boolt{ true }
+  opt = get_option(*sec, "boolt"sv);
+  check_opt_value(*opt, 1, 0, true);
+
+  //boolf{ false }
+  opt = get_option(*sec, "boolf"sv);
+  check_opt_value(*opt, 1, 0, false);
+
+  //str{ 'hi there' }
+  opt = get_option(*sec, "str"sv);
+  check_opt_value(*opt, 1, 0, "hi there"sv);
+
+  //mult{ 1, 2.0, 'three', true }
+  opt = get_option(*sec, "mult"sv);
+  check_opt_value(*opt, 4, 0, 1ll);
+  check_opt_value(*opt, 4, 1, 2.0);
+  check_opt_value(*opt, 4, 2, "three"sv);
+  check_opt_value(*opt, 4, 3, true);
 }
