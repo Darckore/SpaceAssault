@@ -307,3 +307,11 @@ TEST(conf_parser, t_opts)
   check_opt_value(*opt, 4, 2, "three"sv);
   check_opt_value(*opt, 4, 3, true);
 }
+
+TEST(conf_parser, t_subsec)
+{
+  constexpr auto fname = "data/test_set/parse_subsec.txt"sv;
+
+  cfg c{ fname };
+  ASSERT_TRUE(c);
+}
