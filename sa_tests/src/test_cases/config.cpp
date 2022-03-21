@@ -258,7 +258,7 @@ TEST(conf_lex, t_bad3)
 
 TEST(conf_parser, t_opts)
 {
-  constexpr auto fname = "data/test_set/parse_opt1.txt"sv;
+  constexpr auto fname = "data/test_set/parse_opt.txt"sv;
 
   cfg c{ fname };
   ASSERT_TRUE(c);
