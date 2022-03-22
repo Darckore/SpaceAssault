@@ -22,6 +22,11 @@ namespace config
     return &m_root;
   }
 
+  const section& cfg::operator*() const noexcept
+  {
+    return m_root;
+  }
+
   // Private members
 
   void cfg::read() noexcept

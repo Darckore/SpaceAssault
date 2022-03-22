@@ -3,315 +3,360 @@
 using namespace config;
 using token = lex::token;
 
-namespace test_detail
+namespace engine_tests
 {
-  void check_token(lex& l, std::string_view str, token::token_id id)
+  namespace detail
   {
-    auto tok = l.next();
-    ASSERT_TRUE(tok.is(id));
-    ASSERT_EQ(tok.value, str);
-  }
-
-  auto get_option(const section& s, std::string_view name)
-  {
-    auto ret = s.get_option(name);
-    auto check = [ret, name]()
+    void check_token(lex& l, std::string_view str, token::token_id id)
     {
-      ASSERT_TRUE(ret);
-      ASSERT_EQ(name, ret->name());
-    };
-
-    check();
-    return ret;
-  }
-
-  template <typename T>
-  void check_opt_value(const option& opt, std::size_t size, std::size_t idx, T expected)
-  {
-    ASSERT_EQ(size, opt.size());
-    ASSERT_LT(idx, size);
-
-    auto v = opt[idx].try_get<T>();
-    ASSERT_TRUE(v);
-    
-    if constexpr (std::is_floating_point_v<T>)
-    {
-      ASSERT_DOUBLE_EQ(*v, expected);
+      auto tok = l.next();
+      ASSERT_TRUE(tok.is(id));
+      ASSERT_EQ(tok.value, str);
     }
-    else
+
+    auto get_option(const section& s, std::string_view name)
     {
-      ASSERT_EQ(*v, expected);
+      auto ret = s.get_option(name);
+      auto check = [ret, name]()
+      {
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(name, ret->name());
+      };
+
+      check();
+      return ret;
+    }
+
+    template <typename T>
+    void check_opt_value(const option& opt, std::size_t size, std::size_t idx, T expected)
+    {
+      ASSERT_EQ(size, opt.size());
+      ASSERT_LT(idx, size);
+
+      auto v = opt[idx].try_get<T>();
+      ASSERT_TRUE(v);
+
+      if constexpr (std::is_floating_point_v<T>)
+      {
+        ASSERT_DOUBLE_EQ(*v, expected);
+      }
+      else
+      {
+        ASSERT_EQ(*v, expected);
+      }
     }
   }
-}
 
-TEST(conf, t_option)
-{
-  section s{ "empty"sv };
+  TEST(conf, t_option)
+  {
+    section s{ "empty"sv };
 
-  option opt{ "dummy"sv, s };
-  EXPECT_EQ(opt.name(), "dummy"sv);
-  EXPECT_EQ(&opt.parent(), &s);
-  EXPECT_EQ(opt.size(), 0);
+    option opt{ "dummy"sv, s };
+    EXPECT_EQ(opt.name(), "dummy"sv);
+    EXPECT_EQ(&opt.parent(), &s);
+    EXPECT_EQ(opt.size(), 0);
 
-  opt.add_value(10);
-  EXPECT_EQ(opt.size(), 1);
+    opt.add_value(10);
+    EXPECT_EQ(opt.size(), 1);
 
-  auto val = opt[0];
-  EXPECT_FALSE((val.try_get<value::bool_val>()));
-  EXPECT_FALSE((val.try_get<value::float_val>()));
-  
-  ASSERT_TRUE((val.try_get<value::int_val>()));
-  EXPECT_EQ(10, (val.get<value::int_val>()));
-}
+    auto val = opt[0];
+    EXPECT_FALSE((val.try_get<value::bool_val>()));
+    EXPECT_FALSE((val.try_get<value::float_val>()));
 
-TEST(conf, t_section_add_get)
-{
-  section s{ "glob"sv };
+    ASSERT_TRUE((val.try_get<value::int_val>()));
+    EXPECT_EQ(10, (val.get<value::int_val>()));
+  }
 
-  constexpr auto name1 = "dummy"sv;
-  auto&& dummy = s.add_section(name1);
-  EXPECT_TRUE(s.has_section(name1));
+  TEST(conf, t_section_add_get)
+  {
+    section s{ "glob"sv };
 
-  auto&& anotherDummy = s.add_section(name1);
-  EXPECT_TRUE(&dummy == &anotherDummy);
+    constexpr auto name1 = "dummy"sv;
+    auto&& dummy = s.add_section(name1);
+    EXPECT_TRUE(s.has_section(name1));
 
-  auto dummyLookup = s.get_section(name1);
-  EXPECT_TRUE(dummyLookup == &dummy);
+    auto&& anotherDummy = s.add_section(name1);
+    EXPECT_TRUE(&dummy == &anotherDummy);
 
-  const auto& sref = s;
-  auto dummyConstLookup = sref.get_section(name1);
-  EXPECT_TRUE(dummyConstLookup == &dummy);
+    auto dummyLookup = s.get_section(name1);
+    EXPECT_TRUE(dummyLookup == &dummy);
 
-  EXPECT_TRUE(s.is_root());
-  EXPECT_FALSE(dummy.is_root());
-  
-  EXPECT_TRUE(dummy.parent() == &s);
-}
+    const auto& sref = s;
+    auto dummyConstLookup = sref.get_section(name1);
+    EXPECT_TRUE(dummyConstLookup == &dummy);
 
-TEST(conf, t_option_add_get)
-{
-  section s{ "glob"sv };
+    EXPECT_TRUE(s.is_root());
+    EXPECT_FALSE(dummy.is_root());
 
-  constexpr auto optName  = "neko"sv;
-  constexpr auto intVal   = 10;
-  constexpr auto boolVal  = false;
-  constexpr auto floatVal = 42.69;
-  constexpr auto strVal   = "kitty"sv;
-  
-  auto&& opt = s.add_option(optName);
-  EXPECT_TRUE(s.has_option(optName));
+    EXPECT_TRUE(dummy.parent() == &s);
+  }
 
-  opt.add_value(intVal);
-  opt.add_value(boolVal);
-  opt.add_value(floatVal);
-  opt.add_value(strVal);
+  TEST(conf, t_option_add_get)
+  {
+    section s{ "glob"sv };
 
-  const auto& optAdd = s.add_option(optName);
-  ASSERT_EQ(optAdd.size(), 4);
+    constexpr auto optName = "neko"sv;
+    constexpr auto intVal = 10;
+    constexpr auto boolVal = false;
+    constexpr auto floatVal = 42.69;
+    constexpr auto strVal = "kitty"sv;
 
-  auto ip = optAdd[0].try_get<value::int_val>();
-  ASSERT_TRUE(ip);
-  EXPECT_EQ(*ip, intVal);
+    auto&& opt = s.add_option(optName);
+    EXPECT_TRUE(s.has_option(optName));
 
-  auto bp = optAdd[1].try_get<value::bool_val>();
-  ASSERT_TRUE(bp);
-  EXPECT_EQ(*bp, boolVal);
+    opt.add_value(intVal);
+    opt.add_value(boolVal);
+    opt.add_value(floatVal);
+    opt.add_value(strVal);
 
-  auto fp = optAdd[2].try_get<value::float_val>();
-  ASSERT_TRUE(fp);
-  EXPECT_DOUBLE_EQ(*fp, floatVal);
+    const auto& optAdd = s.add_option(optName);
+    ASSERT_EQ(optAdd.size(), 4);
 
-  auto sp = optAdd[3].try_get<value::str_val>();
-  ASSERT_TRUE(sp);
-  EXPECT_EQ(*sp, strVal);
+    auto ip = optAdd[0].try_get<value::int_val>();
+    ASSERT_TRUE(ip);
+    EXPECT_EQ(*ip, intVal);
 
-  EXPECT_EQ((opt[0].get<value::int_val>()), intVal);
-  EXPECT_EQ((opt[1].get<value::bool_val>()), boolVal);
-  EXPECT_DOUBLE_EQ((opt[2].get<value::float_val>()), floatVal);
-  EXPECT_EQ((opt[3].get<value::str_val>()), strVal);
-}
+    auto bp = optAdd[1].try_get<value::bool_val>();
+    ASSERT_TRUE(bp);
+    EXPECT_EQ(*bp, boolVal);
 
-TEST(conf_file, t_bad)
-{
-  constexpr auto fname  = "derp.txt"sv;
+    auto fp = optAdd[2].try_get<value::float_val>();
+    ASSERT_TRUE(fp);
+    EXPECT_DOUBLE_EQ(*fp, floatVal);
 
-  cfg_file f{ fname };
-  EXPECT_FALSE(f);
-  EXPECT_TRUE(f.line().empty());
-}
+    auto sp = optAdd[3].try_get<value::str_val>();
+    ASSERT_TRUE(sp);
+    EXPECT_EQ(*sp, strVal);
 
-TEST(conf_file, t_good)
-{
-  constexpr auto fname = "data/test_set/section.txt"sv;
+    EXPECT_EQ((opt[0].get<value::int_val>()), intVal);
+    EXPECT_EQ((opt[1].get<value::bool_val>()), boolVal);
+    EXPECT_DOUBLE_EQ((opt[2].get<value::float_val>()), floatVal);
+    EXPECT_EQ((opt[3].get<value::str_val>()), strVal);
+  }
 
-  /****************************************
-  * 
-  *      |.section
-  *      |  option{ op1 }
-  *      |  option{ op2, 1, true }
-  *      |
-  *      |  option{ after_empty }
-  * 
-  *****************************************/
-  
-  cfg_file f{ fname };
-  ASSERT_TRUE(f);
+  TEST(conf_file, t_bad)
+  {
+    constexpr auto fname = "derp.txt"sv;
 
-  auto line = f.line();
-  EXPECT_EQ(line, ".section");
-  line = f.line();
-  EXPECT_EQ(line, "  option{ op1 }");
-  line = f.line();
-  EXPECT_EQ(line, "  option{ op2, 1, true }");
-  line = f.line();
-  EXPECT_EQ(line, "  option{ after_empty }");
+    cfg_file f{ fname };
+    EXPECT_FALSE(f);
+    EXPECT_TRUE(f.line().empty());
+  }
 
-  EXPECT_FALSE(f);
-}
+  TEST(conf_file, t_good)
+  {
+    constexpr auto fname = "data/test_set/section.txt"sv;
 
-TEST(conf_lex, t_good)
-{
-  constexpr auto fname = "data/test_set/lex_good.txt"sv;
+    /****************************************
+    *
+    *      |.section
+    *      |  option{ op1 }
+    *      |  option{ op2, 1, true }
+    *      |
+    *      |  option{ after_empty }
+    *
+    *****************************************/
 
-  // .section { option1 { 1, -42, +6.9, 'string value', true, false } }
+    cfg_file f{ fname };
+    ASSERT_TRUE(f);
 
-  cfg_file f{ fname };
-  ASSERT_TRUE(f);
+    auto line = f.line();
+    EXPECT_EQ(line, ".section");
+    line = f.line();
+    EXPECT_EQ(line, "  option{ op1 }");
+    line = f.line();
+    EXPECT_EQ(line, "  option{ op2, 1, true }");
+    line = f.line();
+    EXPECT_EQ(line, "  option{ after_empty }");
 
-  lex l{ f };
+    EXPECT_FALSE(f);
+  }
 
-  using test_detail::check_token;
+  TEST(conf_lex, t_good)
+  {
+    constexpr auto fname = "data/test_set/lex_good.txt"sv;
 
-  check_token(l, ".section"sv,       token::section);
-  check_token(l, "{"sv,              token::curlyOpen);
-  check_token(l, "option1"sv,        token::identifier);
-  check_token(l, "{"sv,              token::curlyOpen);
-  check_token(l, "1"sv,              token::intNum);
-  check_token(l, ","sv,              token::comma);
-  check_token(l, "-42"sv,            token::intNum);
-  check_token(l, ","sv,              token::comma);
-  check_token(l, "+6.9"sv,           token::floatNum);
-  check_token(l, ","sv,              token::comma);
-  check_token(l, "'string value'"sv, token::str);
-  check_token(l, ","sv,              token::comma);
-  check_token(l, "true"sv,           token::boolTrue);
-  check_token(l, ","sv,              token::comma);
-  check_token(l, "false"sv,          token::boolFalse);
-  check_token(l, "}"sv,              token::curlyClose);
-  check_token(l, "}"sv,              token::curlyClose);
+    // .section { option1 { 1, -42, +6.9, 'string value', true, false } }
 
-  EXPECT_TRUE(!l);
-}
+    cfg_file f{ fname };
+    ASSERT_TRUE(f);
 
-TEST(conf_lex, t_bad1)
-{
-  constexpr auto fname = "data/test_set/lex_bad1.txt"sv;
+    lex l{ f };
 
-  cfg_file f{ fname };
-  ASSERT_TRUE(f);
+    using detail::check_token;
 
-  lex l{ f };
+    check_token(l, ".section"sv, token::section);
+    check_token(l, "{"sv, token::curlyOpen);
+    check_token(l, "option1"sv, token::identifier);
+    check_token(l, "{"sv, token::curlyOpen);
+    check_token(l, "1"sv, token::intNum);
+    check_token(l, ","sv, token::comma);
+    check_token(l, "-42"sv, token::intNum);
+    check_token(l, ","sv, token::comma);
+    check_token(l, "+6.9"sv, token::floatNum);
+    check_token(l, ","sv, token::comma);
+    check_token(l, "'string value'"sv, token::str);
+    check_token(l, ","sv, token::comma);
+    check_token(l, "true"sv, token::boolTrue);
+    check_token(l, ","sv, token::comma);
+    check_token(l, "false"sv, token::boolFalse);
+    check_token(l, "}"sv, token::curlyClose);
+    check_token(l, "}"sv, token::curlyClose);
 
-  using test_detail::check_token;
+    EXPECT_TRUE(!l);
+  }
 
-  check_token(l, {}, token::unknown);
-  EXPECT_TRUE(!l);
-}
+  TEST(conf_lex, t_bad1)
+  {
+    constexpr auto fname = "data/test_set/lex_bad1.txt"sv;
 
-TEST(conf_lex, t_bad2)
-{
-  constexpr auto fname = "data/test_set/lex_bad2.txt"sv;
+    cfg_file f{ fname };
+    ASSERT_TRUE(f);
 
-  cfg_file f{ fname };
-  ASSERT_TRUE(f);
+    lex l{ f };
 
-  lex l{ f };
+    using detail::check_token;
 
-  using test_detail::check_token;
+    check_token(l, {}, token::unknown);
+    EXPECT_TRUE(!l);
+  }
 
-  check_token(l, ".section"sv, token::section);
-  check_token(l, {},           token::unknown);
-  EXPECT_TRUE(!l);
-}
+  TEST(conf_lex, t_bad2)
+  {
+    constexpr auto fname = "data/test_set/lex_bad2.txt"sv;
 
-TEST(conf_lex, t_bad3)
-{
-  constexpr auto fname = "data/test_set/lex_bad3.txt"sv;
+    cfg_file f{ fname };
+    ASSERT_TRUE(f);
 
-  cfg_file f{ fname };
-  ASSERT_TRUE(f);
+    lex l{ f };
 
-  lex l{ f };
+    using detail::check_token;
 
-  using test_detail::check_token;
+    check_token(l, ".section"sv, token::section);
+    check_token(l, {}, token::unknown);
+    EXPECT_TRUE(!l);
+  }
 
-  check_token(l, ".section"sv,       token::section);
-  check_token(l, "{"sv,              token::curlyOpen);
-  check_token(l, "option"sv,         token::identifier);
-  check_token(l, "{"sv,              token::curlyOpen);
-  check_token(l, "1"sv,              token::intNum);
-  check_token(l, ","sv,              token::comma);
-  check_token(l, {},                 token::unknown);
-  EXPECT_TRUE(!l);
-}
+  TEST(conf_lex, t_bad3)
+  {
+    constexpr auto fname = "data/test_set/lex_bad3.txt"sv;
 
-TEST(conf_parser, t_opts)
-{
-  constexpr auto fname = "data/test_set/parse_opt.txt"sv;
+    cfg_file f{ fname };
+    ASSERT_TRUE(f);
 
-  cfg c{ fname };
-  ASSERT_TRUE(c);
+    lex l{ f };
 
-  //.section
-  auto sec = c->get_section("section"sv);
-  ASSERT_TRUE(sec);
+    using detail::check_token;
 
-  const option* opt{};
+    check_token(l, ".section"sv, token::section);
+    check_token(l, "{"sv, token::curlyOpen);
+    check_token(l, "option"sv, token::identifier);
+    check_token(l, "{"sv, token::curlyOpen);
+    check_token(l, "1"sv, token::intNum);
+    check_token(l, ","sv, token::comma);
+    check_token(l, {}, token::unknown);
+    EXPECT_TRUE(!l);
+  }
 
-  using test_detail::get_option;
-  using test_detail::check_opt_value;
+  TEST(conf_parser, t_opts)
+  {
+    constexpr auto fname = "data/test_set/parse_opt.txt"sv;
 
-  //intp{ 42 }
-  opt = get_option(*sec, "intp"sv);
-  check_opt_value(*opt, 1, 0, 42ll);
+    cfg c{ fname };
+    ASSERT_TRUE(c);
 
-  //intn{ -42 }
-  opt = get_option(*sec, "intn"sv);
-  check_opt_value(*opt, 1, 0, -42ll);
+    //.section
+    auto sec = c->get_section("section"sv);
+    ASSERT_TRUE(sec);
 
-  //floatp{ 69.5 }
-  opt = get_option(*sec, "floatp"sv);
-  check_opt_value(*opt, 1, 0, 69.5);
+    const option* opt{};
 
-  //floatn{ -69.5 }
-  opt = get_option(*sec, "floatn"sv);
-  check_opt_value(*opt, 1, 0, -69.5);
+    using detail::get_option;
+    using detail::check_opt_value;
 
-  //boolt{ true }
-  opt = get_option(*sec, "boolt"sv);
-  check_opt_value(*opt, 1, 0, true);
+    //intp{ 42 }
+    opt = get_option(*sec, "intp"sv);
+    check_opt_value(*opt, 1, 0, 42ll);
 
-  //boolf{ false }
-  opt = get_option(*sec, "boolf"sv);
-  check_opt_value(*opt, 1, 0, false);
+    //intn{ -42 }
+    opt = get_option(*sec, "intn"sv);
+    check_opt_value(*opt, 1, 0, -42ll);
 
-  //str{ 'hi there' }
-  opt = get_option(*sec, "str"sv);
-  check_opt_value(*opt, 1, 0, "hi there"sv);
+    //floatp{ 69.5 }
+    opt = get_option(*sec, "floatp"sv);
+    check_opt_value(*opt, 1, 0, 69.5);
 
-  //mult{ 1, 2.0, 'three', true }
-  opt = get_option(*sec, "mult"sv);
-  check_opt_value(*opt, 4, 0, 1ll);
-  check_opt_value(*opt, 4, 1, 2.0);
-  check_opt_value(*opt, 4, 2, "three"sv);
-  check_opt_value(*opt, 4, 3, true);
-}
+    //floatn{ -69.5 }
+    opt = get_option(*sec, "floatn"sv);
+    check_opt_value(*opt, 1, 0, -69.5);
 
-TEST(conf_parser, t_subsec)
-{
-  constexpr auto fname = "data/test_set/parse_subsec.txt"sv;
+    //boolt{ true }
+    opt = get_option(*sec, "boolt"sv);
+    check_opt_value(*opt, 1, 0, true);
 
-  cfg c{ fname };
-  ASSERT_TRUE(c);
+    //boolf{ false }
+    opt = get_option(*sec, "boolf"sv);
+    check_opt_value(*opt, 1, 0, false);
+
+    //str{ 'hi there' }
+    opt = get_option(*sec, "str"sv);
+    check_opt_value(*opt, 1, 0, "hi there"sv);
+
+    //mult{ 1, 2.0, 'three', true }
+    opt = get_option(*sec, "mult"sv);
+    check_opt_value(*opt, 4, 0, 1ll);
+    check_opt_value(*opt, 4, 1, 2.0);
+    check_opt_value(*opt, 4, 2, "three"sv);
+    check_opt_value(*opt, 4, 3, true);
+  }
+
+  TEST(conf_parser, t_subsec)
+  {
+    constexpr auto fname = "data/test_set/parse_subsec.txt"sv;
+
+    cfg c{ fname };
+    ASSERT_TRUE(c);
+
+    using detail::get_option;
+    using detail::check_opt_value;
+
+    //global{ 0 }
+    auto opt = get_option(*c, "global"sv);
+    check_opt_value(*opt, 1, 0, 0ll);
+
+    constexpr auto localName = "local"sv;
+
+    //.section
+    auto sec = c->get_section("section"sv);
+    ASSERT_TRUE(sec);
+
+    //local{ 1 }
+    opt = get_option(*sec, localName);
+    check_opt_value(*opt, 1, 0, 1ll);
+
+    //.subsection
+    sec = sec->get_section("subsection"sv);
+    ASSERT_TRUE(sec);
+
+    //local{ 2 }
+    opt = get_option(*sec, localName);
+    check_opt_value(*opt, 1, 0, 2ll);
+
+    //.inner
+    sec = sec->get_section("inner"sv);
+    ASSERT_TRUE(sec);
+
+    //local{ 3 }
+    opt = get_option(*sec, localName);
+    check_opt_value(*opt, 1, 0, 3ll);
+
+    //.another
+    sec = c->get_section("another"sv);
+    ASSERT_TRUE(sec);
+
+    //local{ 4 }
+    opt = get_option(*sec, localName);
+    check_opt_value(*opt, 1, 0, 4ll);
+  }
+
 }

@@ -21,6 +21,8 @@ namespace config
 
     const section* operator->() const noexcept;
 
+    const section& operator*() const noexcept;
+
   private:
     void read() noexcept;
     bool parse() noexcept;
