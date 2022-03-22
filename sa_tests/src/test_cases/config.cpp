@@ -359,4 +359,27 @@ namespace engine_tests
     check_opt_value(*opt, 1, 0, 4ll);
   }
 
+  TEST(conf_parser, t_bad1)
+  {
+    constexpr auto fname = "data/test_set/parse_bad1.txt";
+
+    cfg c{ fname };
+    ASSERT_FALSE(c);
+  }
+
+  TEST(conf_parser, t_bad2)
+  {
+    constexpr auto fname = "data/test_set/parse_bad2.txt";
+
+    cfg c{ fname };
+    ASSERT_FALSE(c);
+  }
+
+  TEST(conf_parser, t_bad3)
+  {
+    constexpr auto fname = "data/test_set/parse_bad3.txt";
+
+    cfg c{ fname };
+    ASSERT_FALSE(c);
+  }
 }
