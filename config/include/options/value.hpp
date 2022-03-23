@@ -25,7 +25,6 @@ namespace config
                                      str_val
                                    >;
 
-  private:
     template <typename T>
     static constexpr auto type_ok = std::is_same_v<T, bool_val> ||
                                     std::is_same_v<T, int_val> ||

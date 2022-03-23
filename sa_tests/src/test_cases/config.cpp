@@ -1,5 +1,6 @@
 #include "config/conf.hpp"
 #include "parser/lex.hpp"
+
 using namespace config;
 using token = lex::token;
 
@@ -132,6 +133,63 @@ namespace engine_tests
     EXPECT_EQ((opt[1].get<value::bool_val>()), boolVal);
     EXPECT_DOUBLE_EQ((opt[2].get<value::float_val>()), floatVal);
     EXPECT_EQ((opt[3].get<value::str_val>()), strVal);
+  }
+
+  template <typename ...T>
+  struct ss
+  {
+    using value_type = std::tuple<T...>;
+    
+    constexpr ss(T&& ...args) noexcept :
+      v{ std::forward<T>(args)... }
+    { }
+
+    template <std::size_t I>
+    constexpr auto get() const noexcept
+    {
+      return std::get<I>(v);
+    }
+
+    value_type v;
+  };
+
+  template <typename ...T>
+  struct std::tuple_size<ss<T...>>
+  {
+    static constexpr auto value = sizeof...(T);
+  };
+
+  template <std::size_t I, typename ...T>
+  struct std::tuple_element<I, ss<T...>>
+  {
+    using type = std::tuple_element_t<I, typename engine_tests::ss<T...>::value_type>;
+  };
+
+  template<typename T, T... ints>
+  std::vector<T> print_sequence(std::integer_sequence<T, ints...>)
+  {
+    std::vector<T> res;
+    ((res.push_back(ints)), ...);
+    return res;
+  }
+
+  TEST(conf, t_opt_to)
+  {
+    section s{ "empty"sv };
+
+    option opt{ "opt"sv, s };
+    opt.add_value(1);
+    opt.add_value(2.0);
+    opt.add_value(false);
+    opt.add_value("hi there"sv);
+
+    using opt_struct = opt_tuple<value::int_val,
+                                 value::float_val,
+                                 value::bool_val,
+                                 value::str_val>;
+
+    auto op_vals = opt.to<long long, double, bool, std::string_view>();
+    utils::unused(op_vals);
   }
 
   TEST(conf_file, t_bad)
