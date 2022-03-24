@@ -124,7 +124,8 @@ namespace config
     size_type size() const noexcept;
 
   private:
-    template <size_type I, typename Tuple>
+    template <size_type I, typename Tuple> requires
+      requires {{ std::tuple_element<I, Tuple>{} };}
     bool set_val(Tuple& t) const noexcept
     {
       using std::get;
@@ -144,12 +145,12 @@ namespace config
       Tuple res{};
 
       const bool ok = (set_val<Seq>(res) && ...);
-
       return ok ? res : res_type{};
     }
 
   public:
-    template <typename T>
+    template <typename T> requires
+      requires {{ std::tuple_size_v<T> };}
     auto to() const noexcept -> opt_type<T>
     {
       constexpr auto tuple_size = std::tuple_size_v<T>;
