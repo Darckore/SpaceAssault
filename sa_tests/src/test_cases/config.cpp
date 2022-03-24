@@ -207,11 +207,11 @@ namespace engine_tests
     auto line = f.line();
     EXPECT_EQ(line, ".section");
     line = f.line();
-    EXPECT_EQ(line, "  option{ op1 }");
+    EXPECT_EQ(line, "option{ op1 }");
     line = f.line();
-    EXPECT_EQ(line, "  option{ op2, 1, true }");
+    EXPECT_EQ(line, "option{ op2, 1, true }");
     line = f.line();
-    EXPECT_EQ(line, "  option{ after_empty }");
+    EXPECT_EQ(line, "option{ after_empty }");
 
     EXPECT_FALSE(f);
   }
