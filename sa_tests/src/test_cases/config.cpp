@@ -175,7 +175,43 @@ namespace engine_tests
     opt.add_value(false);
     opt.add_value("hi there"sv);
 
-    //todo: figure out
+    class wrapper : public opt_wrapper<value::int_val,
+                                       value::float_val,
+                                       value::bool_val,
+                                       value::str_val>
+    {
+    public:
+      CLASS_SPECIALS_NODEFAULT(wrapper);
+
+      wrapper(const option& opt) noexcept :
+        opt_wrapper{ opt }
+      { }
+
+      auto& i() const noexcept
+      {
+        return *get<0>();
+      }
+      auto& f() const noexcept
+      {
+        return *get<1>();
+      }
+      auto& b() const noexcept
+      {
+        return *get<2>();
+      }
+      auto& s() const noexcept
+      {
+        return *get<3>();
+      }
+    };
+
+    wrapper wrap{ opt };
+    ASSERT_TRUE(wrap);
+
+    EXPECT_EQ((wrap.i()), 1ll);
+    EXPECT_DOUBLE_EQ((wrap.f()), 2.0);
+    EXPECT_EQ((wrap.b()), false);
+    EXPECT_EQ((wrap.s()), "hi there"sv);
   }
 
   TEST(conf_file, t_bad)

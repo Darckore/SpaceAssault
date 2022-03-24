@@ -5,65 +5,6 @@ namespace config
 {
   class section;
 
-  template <typename ...T>
-  class opt_tuple
-  {
-  public:
-    using value_type = std::tuple<T...>;
-    using size_type  = std::size_t;
-    static constexpr auto size = std::tuple_size_v<value_type>;
-
-  public:
-    CLASS_SPECIALS_ALL(opt_tuple);
-
-    constexpr opt_tuple(T&& ...args) noexcept :
-      m_val{ std::forward<T>(args)... }
-    {}
-
-    constexpr opt_tuple(value_type val) noexcept :
-      m_val{ std::move(val) }
-    {}
-
-    template <size_type I> requires (I < size)
-    constexpr auto& get() const noexcept
-    {
-      return std::get<I>(m_val);
-    }
-    template <size_type I> requires (I < size)
-    constexpr auto& get() noexcept
-    {
-      return utils::mutate(std::as_const(*this).get<I>());
-    }
-
-  private:
-    value_type m_val;
-  };
-
-  template <typename ...T>
-  struct std::tuple_size<opt_tuple<T...>>
-  {
-    using tuple_type = config::opt_tuple<T...>;
-    static constexpr auto value = tuple_type::size;
-  };
-  template <std::size_t I, typename ...T>
-  struct std::tuple_element<I, opt_tuple<T...>>
-  {
-    using tuple_type = config::opt_tuple<T...>;
-    using type = tuple_element_t<I, typename tuple_type::value_type>;
-  };
-  template <std::size_t I, typename ...T>
-  constexpr decltype(auto) get(opt_tuple<T...>& t) noexcept
-  {
-    using tuple_type = config::opt_tuple<T...>;
-    return t.template get<I>();
-  }
-  template <std::size_t I, typename ...T>
-  constexpr decltype(auto) get(const opt_tuple<T...>& t) noexcept
-  {
-    using tuple_type = config::opt_tuple<T...>;
-    return t.template get<I>();
-  }
-
   class option
   {
   public:
@@ -170,5 +111,108 @@ namespace config
     section*  m_parent{};
     name_type m_name;
     val_store m_values;
+  };
+
+  template <typename ...T>
+    requires (utils::eq_all(true, value::type_ok<T>...))
+  class opt_tuple
+  {
+  public:
+    using value_type = std::tuple<T...>;
+    using size_type  = std::size_t;
+    static constexpr auto size = std::tuple_size_v<value_type>;
+
+  public:
+    CLASS_SPECIALS_ALL(opt_tuple);
+
+    constexpr opt_tuple(T&& ...args) noexcept :
+      m_val{ std::forward<T>(args)... }
+    {}
+
+    constexpr opt_tuple(value_type val) noexcept :
+      m_val{ std::move(val) }
+    {}
+
+    template <size_type I> requires (I < size)
+    constexpr auto& get() const noexcept
+    {
+      return std::get<I>(m_val);
+    }
+    template <size_type I> requires (I < size)
+    constexpr auto& get() noexcept
+    {
+      return utils::mutate(std::as_const(*this).get<I>());
+    }
+
+  private:
+    value_type m_val;
+  };
+
+  template <typename ...T>
+  struct std::tuple_size<opt_tuple<T...>>
+  {
+    using tuple_type = config::opt_tuple<T...>;
+    static constexpr auto value = tuple_type::size;
+  };
+  template <std::size_t I, typename ...T>
+  struct std::tuple_element<I, opt_tuple<T...>>
+  {
+    using tuple_type = config::opt_tuple<T...>;
+    using type = tuple_element_t<I, typename tuple_type::value_type>;
+  };
+  template <std::size_t I, typename ...T>
+  constexpr decltype(auto) get(opt_tuple<T...>& t) noexcept
+  {
+    using tuple_type = config::opt_tuple<T...>;
+    return t.template get<I>();
+  }
+  template <std::size_t I, typename ...T>
+  constexpr decltype(auto) get(const opt_tuple<T...>& t) noexcept
+  {
+    using tuple_type = config::opt_tuple<T...>;
+    return t.template get<I>();
+  }
+
+  template <typename ...T>
+  class opt_wrapper
+  {
+  public:
+    using tuple_type = opt_tuple<T...>;
+    using value_type = option::opt_type<tuple_type>;
+    using size_type  = typename tuple_type::size_type;
+
+  public:
+    CLASS_SPECIALS_NODEFAULT(opt_wrapper);
+
+    opt_wrapper(const option& opt) noexcept :
+      m_value { opt.template to<tuple_type>() }
+    { }
+
+    explicit operator bool() const noexcept
+    {
+      return static_cast<bool>(m_value);
+    }
+
+  public:
+    constexpr auto size() const noexcept
+    {
+      return tuple_type::size;
+    }
+
+  protected:
+    template <size_type I> requires (I < tuple_type::size)
+    auto get() const noexcept
+    {
+      using res_type = std::add_pointer_t<std::tuple_element_t<I, tuple_type>>;
+      return m_value ? &m_value->template get<I>() : res_type{};
+    }
+    template <size_type I> requires (I < tuple_type::size)
+    auto get() noexcept
+    {
+      return utils::mutate(std::as_const(*this).get<I>());
+    }
+
+  private:
+    value_type m_value;
   };
 }
