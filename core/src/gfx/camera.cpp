@@ -47,6 +47,15 @@ namespace engine::graphics
     gfx().bind_scaling(scale);
   }
 
+  void camera::look_at(pos_type point) noexcept
+  {
+    m_origin = point;
+  }
+  camera::pos_type camera::origin() const noexcept
+  {
+    return m_origin;
+  }
+
   // Private members
 
   camera::gfx_type& camera::gfx() noexcept

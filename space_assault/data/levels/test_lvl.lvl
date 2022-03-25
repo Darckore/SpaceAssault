@@ -1,7 +1,7 @@
 .level
 {
   name{ 'test' }
-  camera{ 0, 0, 40 }
+  camera{ -30.0, 40.0, 100.0 }
 }
 
 .assets

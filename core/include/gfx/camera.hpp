@@ -6,6 +6,7 @@ namespace engine::graphics
   class camera
   {
   public:
+    using pos_type    = utils::vecd2;
     using gfx_type    = gfx;
     using dist_type   = double;
     using aspect_type = gfx::ratio_type;
@@ -19,8 +20,11 @@ namespace engine::graphics
 
   public:
     void resize(dist_type fieldSize) noexcept;
-
+    
     void update() noexcept;
+
+    void look_at(pos_type point) noexcept;
+    pos_type origin() const noexcept;
 
   public: // eventually private
     gfx_type& gfx() noexcept;
@@ -30,6 +34,7 @@ namespace engine::graphics
   private:
     gfx_type* m_gfx{};
     aspect_type m_aspect{};
+    pos_type  m_origin{};
     dist_type m_fieldSize{};
   };
 }
