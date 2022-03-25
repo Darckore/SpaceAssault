@@ -1,0 +1,9 @@
+.level
+{
+  name{ 'test' }
+  camera{ -30.0, 40.0, 100.0 }
+}
+
+.assets
+{
+}
