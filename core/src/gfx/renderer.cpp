@@ -188,7 +188,7 @@ namespace engine::graphics
   // stupid test code
   void renderer::line(const point_type& v1, const point_type& v2) noexcept
   {
-    gdi::pen pen{ m_buf, PS_SOLID, 5, utils::colours::green };
+    gdi::pen pen{ m_buf, PS_SOLID, 5, utils::colour{ 255, 128, 64 } };
     const auto p1 = viewport_to_screen(v1);
     const auto p2 = viewport_to_screen(v2);
     MoveToEx(pen.device(), p1.get<0>(), p1.get<1>(), nullptr);
