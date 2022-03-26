@@ -61,7 +61,7 @@ namespace engine::graphics
     void draw() noexcept;
     void setup() noexcept;
 
-    renderer* get_renderer() noexcept;
+    renderer& get_renderer() noexcept;
     void release_renderer() noexcept;
 
     ratio_type calc_aspect_ratio() const noexcept;
@@ -70,7 +70,7 @@ namespace engine::graphics
 
   private:
     window& m_wnd;
-    renderer* m_renderer;
+    renderer& m_renderer;
     viewport_size m_size{};
     ratio_type m_aspect{};
     vertex_type m_origin{};

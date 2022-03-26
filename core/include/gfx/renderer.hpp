@@ -5,7 +5,7 @@ namespace engine::graphics
   class window;
   class gfx;
 
-  class buffer
+  class resource_manager
   {
   public:
     using handle_type = void*;
@@ -13,46 +13,28 @@ namespace engine::graphics
   public:
     friend class renderer;
 
-    CLASS_SPECIALS_ALL_CUSTOM(buffer);
+    CLASS_SPECIALS_NONE(resource_manager);
+
+    ~resource_manager() noexcept;
+
+    explicit operator bool() const noexcept;
 
   private:
-    buffer() = default;
+    resource_manager(const window& wnd) noexcept;
 
   private:
-    void init_buffers(const window& wnd) noexcept;
-    void kill_buffers(const window& wnd) noexcept;
+    void init() noexcept;
+    void resize() noexcept;
+    void kill() noexcept;
 
-    void clear(const window& wnd) noexcept;
-    void swap(const window& wnd) noexcept;
-
-  public:
-    template <typename To>
-    auto active_buf() const noexcept
-    {
-      return reinterpret_cast<To>(m_cur);
-    }
-    template <typename To>
-    auto prev_buf() const noexcept
-    {
-      return reinterpret_cast<To>(m_prev);
-    }
-    template <typename To>
-    auto device() const noexcept
-    {
-      return reinterpret_cast<To>(m_device);
-    }
-    template <typename To>
-    auto wnd_device() const noexcept
-    {
-      return reinterpret_cast<To>(m_wndDevice);
-    }
+    void clear() noexcept;
+    void swap() noexcept;
 
   private:
-    handle_type m_prev{};
-    handle_type m_cur{};
-
-    handle_type m_device{};
-    handle_type m_wndDevice{};
+    const window& m_wnd;
+    handle_type m_d2dFactory{};
+    handle_type m_target{};
+    handle_type m_brush{};
   };
 
   class renderer
@@ -60,7 +42,7 @@ namespace engine::graphics
   private:
     using storage_type = std::unordered_map<const gfx*, renderer>;
     using point_type   = utils::vecd2;
-    using pixel_type   = utils::point2d;
+    using pixel_type   = utils::vecf2;
 
   public:
     static renderer& get(const gfx* g, const window& wnd) noexcept;
@@ -76,9 +58,10 @@ namespace engine::graphics
 
     renderer(const window& wnd) noexcept;
 
-  public:
-    void reset() noexcept;
+    explicit operator bool() const noexcept;
 
+  public:
+    void resize() noexcept;
     void init_drawing() noexcept;
     void end_drawing() noexcept;
 
@@ -93,7 +76,7 @@ namespace engine::graphics
 
   private:
     const window& m_wnd;
-    buffer m_buf;
+    resource_manager m_resMgr;
   };
 
 }
