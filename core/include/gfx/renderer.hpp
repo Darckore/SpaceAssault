@@ -1,41 +1,10 @@
 #pragma once
+#include <d2d1.h>
 
 namespace engine::graphics
 {
   class window;
   class gfx;
-
-  class resource_manager
-  {
-  public:
-    using handle_type = void*;
-
-  public:
-    friend class renderer;
-
-    CLASS_SPECIALS_NONE(resource_manager);
-
-    ~resource_manager() noexcept;
-
-    explicit operator bool() const noexcept;
-
-  private:
-    resource_manager(const window& wnd) noexcept;
-
-  private:
-    void init() noexcept;
-    void resize() noexcept;
-    void kill() noexcept;
-
-    void clear() noexcept;
-    void swap() noexcept;
-
-  private:
-    const window& m_wnd;
-    handle_type m_d2dFactory{};
-    handle_type m_target{};
-    handle_type m_brush{};
-  };
 
   class renderer
   {
@@ -76,7 +45,8 @@ namespace engine::graphics
 
   private:
     const window& m_wnd;
-    resource_manager m_resMgr;
+    ID2D1Factory* m_factory{};
+    ID2D1HwndRenderTarget* m_target{};
   };
 
 }
