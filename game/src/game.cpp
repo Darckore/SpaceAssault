@@ -14,7 +14,10 @@ namespace assault::game
 
   game::~game() noexcept = default;
 
-  game::game() noexcept = default;
+  game::game() noexcept
+  {
+    run();
+  }
 
   // Public members
 

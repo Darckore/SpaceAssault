@@ -1,5 +1,5 @@
 #pragma once
-#include "game/i_game.hpp"
+#include "core/core.hpp"
 
 namespace engine
 {
@@ -8,15 +8,14 @@ namespace engine
     class scene;
   }
 
-  class base_game : public i_game
+  class base_game
   {
   public:
     friend class core;
 
   public:
-    using base_type     = i_game;
-    using time_type     = base_type::time_type;
-    using graphics_type = base_type::graphics_type;
+    using time_type     = core::time_type;
+    using graphics_type = core::graphics_type;
     using scene_type    = world::scene;
 
   public:
@@ -25,8 +24,7 @@ namespace engine
     base_game() noexcept;
 
   public:
-    void run() noexcept;
-    void quit() noexcept;
+    virtual void request_quit(const world::scene& caller) noexcept = 0;
 
   protected:
     virtual bool before_run() noexcept = 0;
@@ -34,6 +32,9 @@ namespace engine
     virtual void render() noexcept = 0;
 
   protected:
+    void run() noexcept;
+    void quit() noexcept;
+
     graphics_type& gfx() noexcept;
     scene_type& scene() noexcept;
 

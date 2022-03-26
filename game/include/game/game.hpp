@@ -17,7 +17,7 @@ namespace assault::game
     game() noexcept;
 
   public:
-    void request_quit(const scene_type& caller) noexcept override;
+    virtual void request_quit(const scene_type& caller) noexcept override;
 
   private:
     virtual bool before_run() noexcept override;

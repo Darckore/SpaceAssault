@@ -20,7 +20,7 @@ namespace engine::world
     };
 
   public:
-    using owner_type  = i_game;
+    using owner_type  = base_game;
     using gfx_type    = owner_type::graphics_type;
     using time_type   = owner_type::time_type;
     using camera_type = graphics::camera;

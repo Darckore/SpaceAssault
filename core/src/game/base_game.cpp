@@ -10,7 +10,7 @@ namespace engine
   {
   }
 
-  // Public members
+  // Protected members
 
   void base_game::run() noexcept
   {
@@ -20,8 +20,6 @@ namespace engine
   {
     m_engine.shutdown();
   }
-
-  // Protected members
 
   base_game::graphics_type& base_game::gfx() noexcept
   {
