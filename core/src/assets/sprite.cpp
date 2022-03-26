@@ -66,17 +66,11 @@ namespace engine::graphics
   void sprite::to_bmp_bytes() noexcept
   {
     constexpr auto quadSz   = 4ull;
-    constexpr auto halfQuad = quadSz / 2;
-    auto flipQuad = [halfQuad](auto beg, auto end)
+    auto flipQuad = [](auto beg, auto end)
     {
       using std::swap;
-      --end;
-      for (auto i = 0ull; i < halfQuad; ++i)
-      {
-        swap(*beg, *end);
-        ++beg;
-        --end;
-      }
+      std::advance(end, -2);
+      swap(*beg, *end);
     };
 
     for (auto beg = m_data.begin(), end = m_data.begin(); beg != m_data.end(); )

@@ -65,10 +65,10 @@ namespace engine::graphics
 
         if (m_mode == byte_order::bmp)
         {
-          res.set_alpha(*(it++));
           res.set_blue(*(it++));
           res.set_green(*(it++));
           res.set_red(*(it++));
+          res.set_alpha(*(it++));
         }
         else if (m_mode == byte_order::png)
         {
