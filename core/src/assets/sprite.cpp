@@ -36,6 +36,11 @@ namespace engine::graphics
     return m_byteOrder;
   }
 
+  sprite::colour_container sprite::colours() const noexcept
+  {
+    return { m_data.begin(), m_data.end(), m_byteOrder };
+  }
+
   // Private members
 
   unsigned sprite::load(name_type fname) noexcept
@@ -60,6 +65,25 @@ namespace engine::graphics
   }
   void sprite::to_bmp_bytes() noexcept
   {
-    
+    constexpr auto quadSz   = 4ull;
+    constexpr auto halfQuad = quadSz / 2;
+    auto flipQuad = [halfQuad](auto beg, auto end)
+    {
+      using std::swap;
+      --end;
+      for (auto i = 0ull; i < halfQuad; ++i)
+      {
+        swap(*beg, *end);
+        ++beg;
+        --end;
+      }
+    };
+
+    for (auto beg = m_data.begin(), end = m_data.begin(); beg != m_data.end(); )
+    {
+      std::advance(end, quadSz);
+      flipQuad(beg, end);
+      beg = end;
+    }
   }
 }
