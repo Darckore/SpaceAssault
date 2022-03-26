@@ -1,6 +1,5 @@
 #pragma once
 #include "gfx/window.hpp"
-#include "core/err.hpp"
 
 namespace engine
 {
@@ -16,16 +15,6 @@ namespace engine::graphics
   {
   public:
     friend class engine::core;
-
-  public:
-    class gfx_error : public err::error
-    {
-    public:
-      static constexpr auto prefix = "gfx"sv;
-
-    public:
-      using error::error;
-    };
 
   public:
     using viewport_size  = window::dimensions;

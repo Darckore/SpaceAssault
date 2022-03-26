@@ -1,20 +1,9 @@
 #pragma once
-#include "core/err.hpp"
 
 namespace engine::graphics
 {
   class window
   {
-  public:
-    class wnd_error : public err::error
-    {
-    public:
-      static constexpr auto prefix = "window"sv;
-
-    public:
-      using error::error;
-    };
-
   public:
     using str_type      = std::string;
     using size_type     = std::int32_t;
