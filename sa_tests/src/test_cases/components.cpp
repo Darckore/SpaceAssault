@@ -12,6 +12,8 @@ namespace engine_tests
       cmp1() noexcept :
         derived_from{ nullptr }
       { }
+
+      virtual void update(time_type) noexcept override{ }
     };
 
     class cmp2 : public base_component<cmp2>
@@ -21,6 +23,8 @@ namespace engine_tests
       cmp2() noexcept :
         derived_from{ nullptr }
       { }
+
+      virtual void update(time_type) noexcept override{ }
     };
 
     class cmp3 : public base_component<cmp3>
@@ -30,6 +34,8 @@ namespace engine_tests
       cmp3() noexcept :
         derived_from{ nullptr }
       { }
+
+      virtual void update(time_type) noexcept override{ }
     };
   }
 

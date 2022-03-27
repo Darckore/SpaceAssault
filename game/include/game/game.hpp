@@ -6,8 +6,7 @@ namespace assault::game
   class game final : public engine::base_game
   {
   public:
-    using base_type  = engine::base_game;
-    using scene_type = base_type::scene_type;
+    using base_type = engine::base_game;
 
   public:
     CLASS_SPECIALS_NONE_CUSTOM(game);

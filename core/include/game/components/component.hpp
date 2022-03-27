@@ -7,7 +7,8 @@ namespace engine::world
   class component
   {
   protected:
-    using id_type = std::size_t;
+    using time_type  = engine::time_type;
+    using id_type    = std::size_t;
     using owner_type = game_object;
 
   protected:
@@ -22,7 +23,7 @@ namespace engine::world
     explicit component(id_type id, owner_type* owner) noexcept;
 
   public:
-
+    virtual void update(time_type dt) noexcept = 0;
 
   public:
     id_type id() const noexcept;
@@ -38,8 +39,7 @@ namespace engine::world
   public:
     using base_type  = component;
     using child_type = Derived;
-    using id_type = base_type::id_type;
-    using owner_type = base_type::owner_type;
+
     using derived_from = base_component<child_type>;
 
   public:

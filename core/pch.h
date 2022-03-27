@@ -30,3 +30,8 @@
 using namespace std::literals;
 
 #include "utils/utils.hpp"
+
+namespace engine
+{
+  using time_type = float;
+}

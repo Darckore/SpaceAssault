@@ -9,7 +9,7 @@ namespace engine
   public:
     friend class base_game;
 
-    using time_type = float;
+    using time_type  = engine::time_type;
     using clock_type = utils::clock<time_type>;
     using window_type   = graphics::window;
     using graphics_type = graphics::gfx;
