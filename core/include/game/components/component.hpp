@@ -15,7 +15,7 @@ namespace engine::world
     static id_type make_id() noexcept;
 
   public:
-    CLASS_SPECIALS_NODEFAULT_NOCOPY(component);
+    CLASS_SPECIALS_NODEFAULT(component);
 
     virtual ~component() noexcept;
 
@@ -50,7 +50,7 @@ namespace engine::world
     }
 
   public:
-    CLASS_SPECIALS_NOCOPY_CUSTOM(base_component);
+    CLASS_SPECIALS_NODEFAULT(base_component);
 
   protected:
     explicit base_component(owner_type* owner) noexcept :

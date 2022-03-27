@@ -6,7 +6,7 @@ namespace engine::world
   class game_object
   {
   public:
-    CLASS_SPECIALS_NODEFAULT_NOCOPY(game_object);
+    CLASS_SPECIALS_ALL(game_object);
 
   public:
 

@@ -1,4 +1,6 @@
 #include "game/components/component.hpp"
+#include "game/objects/gameobj.hpp"
+#include "game/components/cm_transform.hpp"
 using namespace engine::world;
 
 namespace engine_tests
@@ -72,4 +74,31 @@ namespace engine_tests
     EXPECT_NE(ti3, ti1_1);
     EXPECT_NE(ti3, ti2_1);
   }
+
+  TEST(cmp, t_transform)
+  {
+    game_object fake;
+    using ct = components::transform;
+    using vt = ct::vector_type;
+    ct t{ fake };
+
+    auto&& pos = t.position();
+    auto&& dir = t.heading();
+    EXPECT_TRUE((pos == vt{}));
+    EXPECT_TRUE((dir == vt::axis_norm<0>()));
+
+    constexpr auto newPos = vt{ 1, 0 };
+    t.reposition(newPos);
+    EXPECT_TRUE((pos == newPos));
+    EXPECT_TRUE((dir == vt::axis_norm<0>()));
+
+    constexpr auto delta = vt{ -1, 3 };
+    t.shift(delta);
+    EXPECT_TRUE((pos == newPos + delta));
+
+    const auto newDir = (vt{} - pos).get_normalised();
+    t.head_to(vt{});
+    EXPECT_TRUE((dir == newDir));
+  }
+
 }
