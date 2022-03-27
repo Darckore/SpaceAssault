@@ -41,4 +41,9 @@ namespace engine
     m_curScene = &s;
     return true;
   }
+
+  base_game::component_store& base_game::components() noexcept
+  {
+    return m_components;
+  }
 }

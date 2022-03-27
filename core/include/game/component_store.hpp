@@ -29,6 +29,7 @@ namespace engine::world
     {
     public:
       using value_type = Component;
+      using data_type = std::unordered_map<game_object*, value_type>;
 
     public:
       CLASS_SPECIALS_NONE_CUSTOM(component_collection);
@@ -37,8 +38,20 @@ namespace engine::world
         base_cmp_collection{ value_type::type_id() }
       { }
 
-    private:
+    public:
+      template <typename ...Args>
+      value_type& add(game_object* owner, Args&& ...args) noexcept
+      {
+        return m_data.try_emplace(owner, std::forward<Args>(args)...).first->second;
+      }
+      
+      void remove(game_object* owner) noexcept
+      {
+        m_data.erase(owner);
+      }
 
+    private:
+      data_type m_data;
     };
 
   }
@@ -55,6 +68,21 @@ namespace engine::world
     CLASS_SPECIALS_NONE_CUSTOM(component_store);
 
     component_store() noexcept;
+
+  public:
+    template <typename Component, typename ...Args>
+      requires (std::is_base_of_v<base_component<Component>, Component>)
+    Component& add(game_object* owner, Args&& ...args) noexcept
+    {
+      return m_data[Component::type_id()].add(owner, std::forward<Args>(args)...);
+    }
+
+    template <typename Component>
+      requires (std::is_base_of_v<base_component<Component>, Component>)
+    void remove(game_object* owner) noexcept
+    {
+      m_data[Component::type_id()].remove(owner);
+    }
 
   private:
     data_type m_data;

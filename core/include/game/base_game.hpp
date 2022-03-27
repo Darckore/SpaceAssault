@@ -1,5 +1,6 @@
 #pragma once
 #include "core/core.hpp"
+#include "game/component_store.hpp"
 
 namespace engine
 {
@@ -17,6 +18,7 @@ namespace engine
     using time_type     = core::time_type;
     using graphics_type = core::graphics_type;
     using scene_type    = world::scene;
+    using component_store = world::component_store;
 
   public:
     CLASS_SPECIALS_NONE_CUSTOM(base_game);
@@ -40,8 +42,12 @@ namespace engine
 
     bool switch_scene(scene_type& s) noexcept;
 
+    component_store& components() noexcept;
+
   private:
     core m_engine;
     scene_type* m_curScene{};
+
+    component_store m_components;
   };
 }
