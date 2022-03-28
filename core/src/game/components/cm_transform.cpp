@@ -4,12 +4,12 @@ namespace engine::world::components
 {
   // Special members
 
-  transform::transform(owner_type& owner) noexcept :
+  transform::transform(owner_type* owner) noexcept :
     transform{ owner, {}, vector_type::axis_norm<0>() }
   { }
 
-  transform::transform(owner_type& owner, vector_type pos, vector_type dir) noexcept :
-    derived_from{ &owner },
+  transform::transform(owner_type* owner, vector_type pos, vector_type dir) noexcept :
+    derived_from{ owner },
     m_position{ pos },
     m_heading{ dir.get_normalised() }
   { }

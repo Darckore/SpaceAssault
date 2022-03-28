@@ -13,18 +13,13 @@ namespace engine::world
     public:
       CLASS_SPECIALS_NONE_CUSTOM(base_cmp_collection);
 
+      virtual ~base_cmp_collection() noexcept = default;
+
     protected:
-      explicit base_cmp_collection(id_type id) noexcept;
-
-    public:
-      id_type id() const noexcept;
-
-    private:
-      id_type m_id;
+      base_cmp_collection() noexcept = default;
     };
 
-    template <typename Component>
-      requires (std::is_base_of_v<base_component<Component>, Component>)
+    template <game_component Component>
     class component_collection : public base_cmp_collection
     {
     public:
@@ -34,9 +29,9 @@ namespace engine::world
     public:
       CLASS_SPECIALS_NONE_CUSTOM(component_collection);
 
-      component_collection() noexcept :
-        base_cmp_collection{ value_type::type_id() }
-      { }
+      virtual ~component_collection() noexcept = default;
+
+      component_collection() noexcept = default;
 
     public:
       template <typename ...Args>
@@ -64,25 +59,48 @@ namespace engine::world
     using id_type    = value_type::id_type;
     using data_type  = std::map<id_type, ptr_type>;
 
+    template <game_component Component>
+    using collection = detail::component_collection<Component>;
+
   public:
     CLASS_SPECIALS_NONE_CUSTOM(component_store);
 
-    component_store() noexcept;
+    virtual ~component_store() noexcept = default;
+
+    component_store() noexcept = default;
 
   public:
-    template <typename Component, typename ...Args>
-      requires (std::is_base_of_v<base_component<Component>, Component>)
+    template <game_component Component, typename ...Args>
     Component& add(game_object* owner, Args&& ...args) noexcept
     {
-      return m_data[Component::type_id()].add(owner, std::forward<Args>(args)...);
+      auto&& cmp = get_collection<Component>().add(owner, owner, std::forward<Args>(args)...);
+      attach_to(owner, cmp);
+      return cmp;
     }
 
-    template <typename Component>
-      requires (std::is_base_of_v<base_component<Component>, Component>)
+    template <game_component Component>
     void remove(game_object* owner) noexcept
     {
-      m_data[Component::type_id()].remove(owner);
+      remove_from(owner, Component::type_id());
+      return get_collection<Component>().remove(owner);
     }
+
+  private:
+    template <game_component Component>
+    collection<Component>& get_collection() noexcept
+    {
+      using res_type = collection<Component>;
+
+      auto&& item = m_data[Component::type_id()];
+      if (!item)
+      {
+        item = std::make_unique<res_type>();
+      }
+      return static_cast<res_type&>(*item);
+    }
+
+    void attach_to(game_object* owner, component& cmp) const noexcept;
+    void remove_from(game_object* owner, id_type id) const noexcept;
 
   private:
     data_type m_data;

@@ -3,7 +3,7 @@
 
 namespace engine::world::components
 {
-  class transform : public base_component<transform>
+  class transform final : public base_component<transform>
   {
   public:
     using vector_type = utils::vecd2;
@@ -13,9 +13,9 @@ namespace engine::world::components
 
     virtual ~transform() = default;
 
-    explicit transform(owner_type& owner) noexcept;
+    explicit transform(owner_type* owner) noexcept;
 
-    transform(owner_type& owner, vector_type pos, vector_type dir) noexcept;
+    transform(owner_type* owner, vector_type pos, vector_type dir) noexcept;
 
   public:
     const vector_type& position() const noexcept;

@@ -52,9 +52,14 @@ namespace engine::world
   public:
     CLASS_SPECIALS_NODEFAULT(base_component);
 
+    virtual ~base_component() noexcept = default;
+
   protected:
     explicit base_component(owner_type* owner) noexcept :
       base_type{ type_id(), owner }
     { }
   };
+
+  template <typename C>
+  concept game_component = std::is_base_of_v<base_component<C>, C>;
 }

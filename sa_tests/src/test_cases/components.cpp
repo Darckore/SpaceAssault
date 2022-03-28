@@ -1,4 +1,4 @@
-#include "game/components/component.hpp"
+#include "game/component_store.hpp"
 #include "game/objects/gameobj.hpp"
 #include "game/components/cm_transform.hpp"
 using namespace engine::world;
@@ -41,6 +41,20 @@ namespace engine_tests
     };
   }
 
+  TEST(cmp, t_collection)
+  {
+    component_store store;
+    game_object fake;
+    using utils::vecd2;
+    using components::transform;
+
+    auto&& c_tr = store.add<transform>(&fake, vecd2{}, vecd2::axis_norm<1>());
+    EXPECT_EQ(c_tr.id(), transform::type_id());
+    EXPECT_EQ((fake.get_component<transform>()), &c_tr);
+    store.remove<transform>(&fake);
+    EXPECT_FALSE((fake.get_component<transform>()));
+  }
+
   TEST(cmp, t_id)
   {
     detail::cmp1 c1_1;
@@ -80,7 +94,7 @@ namespace engine_tests
     game_object fake;
     using ct = components::transform;
     using vt = ct::vector_type;
-    ct t{ fake };
+    ct t{ &fake };
 
     auto&& pos = t.position();
     auto&& dir = t.heading();
@@ -100,5 +114,4 @@ namespace engine_tests
     t.head_to(vt{});
     EXPECT_TRUE((dir == newDir));
   }
-
 }

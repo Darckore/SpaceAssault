@@ -1,21 +1,22 @@
 #include "game/component_store.hpp"
+#include "game/objects/gameobj.hpp"
 
 namespace engine::world
 {
-  namespace detail
-  {
-    base_cmp_collection::base_cmp_collection(id_type id) noexcept :
-      m_id{ id }
-    { }
+  // Private members
 
-    base_cmp_collection::id_type base_cmp_collection::id() const noexcept
+  void component_store::attach_to(game_object* owner, component& cmp) const noexcept
+  {
+    if (owner)
     {
-      return m_id;
+      owner->attach_component(cmp);
     }
   }
-
-  // Special members
-
-  component_store::component_store() noexcept = default;
-
+  void component_store::remove_from(game_object* owner, id_type id) const noexcept
+  {
+    if (owner)
+    {
+      owner->remove_component(id);
+    }
+  }
 }
