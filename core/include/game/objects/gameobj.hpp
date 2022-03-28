@@ -38,14 +38,9 @@ namespace engine::world
     }
 
   private:
-    void attach_component(component_type& c) noexcept
-    {
-      m_data.insert_or_assign(c.id(), &c);
-    }
-    void remove_component(id_type id) noexcept
-    {
-      m_data.erase(id);
-    }
+    void attach_component(component_type& c) noexcept;
+    void remove_component(id_type id) noexcept;
+    void remove_all() noexcept;
 
   private:
     data_type m_data;

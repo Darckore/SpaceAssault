@@ -15,6 +15,8 @@ namespace engine::world
 
       virtual ~base_cmp_collection() noexcept = default;
 
+      virtual void remove(game_object* owner) noexcept = 0;
+
     protected:
       base_cmp_collection() noexcept = default;
     };
@@ -40,7 +42,7 @@ namespace engine::world
         return m_data.try_emplace(owner, std::forward<Args>(args)...).first->second;
       }
       
-      void remove(game_object* owner) noexcept
+      virtual void remove(game_object* owner) noexcept override
       {
         m_data.erase(owner);
       }
@@ -84,6 +86,8 @@ namespace engine::world
       remove_from(owner, Component::type_id());
       return get_collection<Component>().remove(owner);
     }
+
+    void remove_all(game_object* owner) noexcept;
 
   private:
     template <game_component Component>
