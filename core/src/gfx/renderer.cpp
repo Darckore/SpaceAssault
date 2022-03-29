@@ -2,6 +2,7 @@
 #include "gfx/gfx.hpp"
 #include "gfx/window.hpp"
 #include "core/win_includes.hpp"
+#include "assets/sprite.hpp"
 
 #include <d2d1helper.h>
 #include <dwrite.h>
@@ -30,6 +31,45 @@ namespace engine::graphics
         (*resource) = nullptr;
       }
     }
+
+    class bitmap
+    {
+    public:
+      using value_type = ID2D1Bitmap*;
+
+    public:
+      CLASS_SPECIALS_NONE(bitmap);
+
+      ~bitmap() noexcept
+      {
+        release(&m_bitmap);
+      }
+
+      bitmap(ID2D1RenderTarget* target, const sprite& s) noexcept
+      {
+        auto src = s.data();
+        
+        const auto sz     = D2D1::SizeU(s.width(), s.height());
+        const auto format = D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE);
+        const auto props  = D2D1::BitmapProperties(format);
+        const auto pitch  = s.width() * 4;
+        const auto res    = target->CreateBitmap(sz, src, pitch, &props, &m_bitmap);
+        utils::unused(res);
+      }
+
+      explicit operator bool() const noexcept
+      {
+        return static_cast<bool>(m_bitmap);
+      }
+
+      value_type operator->() noexcept
+      {
+        return m_bitmap;
+      }
+
+    private:
+      value_type m_bitmap{};
+    };
   }
 
   // Statics
@@ -103,18 +143,30 @@ namespace engine::graphics
   // Draw stuff
 
   // stupid test code
-  void renderer::line(const point_type& v1, const point_type& v2) noexcept
+  void renderer::image(const sprite& s, const point_type& pos, const point_type& dir) noexcept
   {
-    ID2D1SolidColorBrush* brush{};
-    m_target->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::DarkBlue }, &brush);
-    auto p1 = viewport_to_screen(v1);
-    auto p2 = viewport_to_screen(v2);
-    m_target->DrawLine(D2D1::Point2F(p1[0], p1[1]),
-                       D2D1::Point2F(p2[0], p2[1]),
-                       brush,
-                       5.0f);
-    
-    detail::release(&brush);
+    if (!s)
+    {
+      return;
+    }
+
+    auto&& bm = to_bitmap(s);
+    if (!bm)
+    {
+      return;
+    }
+
+    utils::unused(pos, dir);
+    //ID2D1SolidColorBrush* brush{};
+    //m_target->CreateSolidColorBrush(D2D1::ColorF{ D2D1::ColorF::DarkBlue }, &brush);
+    //auto p1 = viewport_to_screen(v1);
+    //auto p2 = viewport_to_screen(v2);
+    //m_target->DrawLine(D2D1::Point2F(p1[0], p1[1]),
+    //                   D2D1::Point2F(p2[0], p2[1]),
+    //                   brush,
+    //                   5.0f);
+    //
+    //detail::release(&brush);
   }
 
   // Private members
@@ -149,6 +201,7 @@ namespace engine::graphics
   }
   void renderer::release() noexcept
   {
+    m_bitmapCache.clear();
     detail::release(&m_factory);
     detail::release(&m_target);
   }
@@ -160,5 +213,17 @@ namespace engine::graphics
     const auto x = static_cast<coord_t>(v[0]) + w / 2;
     const auto y = h / 2 - static_cast<coord_t>(v[1]);
     return { x, y };
+  }
+
+  renderer::bitmap& renderer::to_bitmap(const sprite& s) noexcept
+  {
+    const auto key = fsys::hash_value(s.filename());
+    if (auto item = m_bitmapCache.find(key); item != m_bitmapCache.end())
+    {
+      return item->second;
+    }
+
+    auto newitem = m_bitmapCache.try_emplace(key, m_target, s);
+    return newitem.first->second;
   }
 }

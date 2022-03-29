@@ -47,11 +47,11 @@ namespace engine::graphics
   }
 
   // stupid test code
-  void gfx::draw(const vertex_type& v1, const vertex_type& v2) noexcept
+  void gfx::draw(const sprite& s, const vertex_type& pos, const vertex_type& dir) noexcept
   {
-    const auto cv1 = world_to_viewport(v1);
-    const auto cv2 = world_to_viewport(v2);
-    m_renderer.line(cv1, cv2);
+    const auto p1 = world_to_viewport(pos);
+    const auto d1 = world_to_viewport(dir).get_normalised();
+    m_renderer.image(s, p1, dir);
   }
 
   // Private members

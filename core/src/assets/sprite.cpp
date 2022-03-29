@@ -42,6 +42,16 @@ namespace engine::graphics
     return { m_data.begin(), m_data.end(), m_byteOrder };
   }
 
+  const sprite::name_type& sprite::filename() const noexcept
+  {
+    return m_name;
+  }
+
+  sprite::buf_type sprite::data() const noexcept
+  {
+    return m_data.data();
+  }
+
   // Private members
 
   unsigned sprite::load() noexcept

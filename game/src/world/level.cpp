@@ -1,5 +1,6 @@
 #include "world/level.hpp"
 #include "config/conf.hpp"
+#include "assets/sprite.hpp"
 
 // stupid test code
 namespace test_thingy
@@ -8,39 +9,35 @@ namespace test_thingy
 
   struct thing
   {
-    static constexpr utils::vecd2 v1{ 0.0,    10.0 };
-    static constexpr utils::vecd2 v2{ -10.0, -10.0 };
-    static constexpr utils::vecd2 v3{ 10.0,  -10.0 };
+    static constexpr utils::vecd2 pos{};
+    static constexpr utils::vecd2 dir = utils::vecd2::axis_norm<1>();
     static double angle;
+    static utils::vecd2 heading;
 
-    static utils::vecd2 to1;
-    static utils::vecd2 to2;
-    static utils::vecd2 to3;
-
+    static auto& get_sprite() noexcept
+    {
+      using engine::graphics::sprite;
+      static sprite s{ "data/assets/thing.png", sprite::bmp };
+      return s;
+    }
     static void step(level::camera_type& cam, float dt) noexcept
     {
+      utils::unused(cam);
       if (angle >= 360.0)
         angle = 0.0;
 
       angle += 45.0 * dt;
-
-      const auto origin = cam.origin();
-      to1 = v1.get_rotated(utils::deg_to_rad(angle)) - origin;
-      to2 = v2.get_rotated(utils::deg_to_rad(angle)) - origin;
-      to3 = v3.get_rotated(utils::deg_to_rad(angle)) - origin;
+      heading = dir.get_rotated(utils::deg_to_rad(angle));
     }
     static void draw(level::camera_type& cam) noexcept
     {
-      cam.gfx().draw(to1, to2);
-      cam.gfx().draw(to2, to3);
-      cam.gfx().draw(to3, to1);
+      auto&& ss = get_sprite();
+      cam.gfx().draw(ss, pos, heading);
     }
   };
 
   double thing::angle = 0.0;
-  utils::vecd2 thing::to1;
-  utils::vecd2 thing::to2;
-  utils::vecd2 thing::to3;
+  utils::vecd2 thing::heading = dir;
 
 }
 

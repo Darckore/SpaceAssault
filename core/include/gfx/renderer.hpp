@@ -5,6 +5,12 @@ namespace engine::graphics
 {
   class window;
   class gfx;
+  class sprite;
+
+  namespace detail
+  {
+    class bitmap;
+  }
 
   class renderer
   {
@@ -12,6 +18,8 @@ namespace engine::graphics
     using storage_type = std::unordered_map<const gfx*, renderer>;
     using point_type   = utils::vecd2;
     using pixel_type   = utils::vecf2;
+    using bitmap       = detail::bitmap;
+    using sprite_map   = std::unordered_map<std::size_t, bitmap>;
 
   public:
     static renderer& get(const gfx* g, const window& wnd) noexcept;
@@ -35,7 +43,7 @@ namespace engine::graphics
     void end_drawing() noexcept;
 
     //stupid test code
-    void line(const point_type& v1, const point_type& v2) noexcept;
+    void image(const sprite& s, const point_type& pos, const point_type& dir) noexcept;
 
   private:
     void init() noexcept;
@@ -43,10 +51,14 @@ namespace engine::graphics
 
     pixel_type viewport_to_screen(const point_type& v) const noexcept;
 
+    bitmap& to_bitmap(const sprite& s) noexcept;
+
   private:
     const window& m_wnd;
     ID2D1Factory* m_factory{};
     ID2D1HwndRenderTarget* m_target{};
+
+    sprite_map m_bitmapCache;
   };
 
 }

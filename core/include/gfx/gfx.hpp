@@ -10,6 +10,7 @@ namespace engine::graphics
 {
   class window;
   class renderer;
+  class sprite;
 
   class gfx
   {
@@ -43,7 +44,7 @@ namespace engine::graphics
 
   public:
     // stupid test code
-    void draw(const vertex_type& v1, const vertex_type& v2) noexcept;
+    void draw(const sprite& s, const vertex_type& pos, const vertex_type& dir) noexcept;
 
   private:
     void begin_frame() noexcept;

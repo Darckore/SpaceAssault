@@ -7,6 +7,7 @@ namespace engine::graphics
   public:
     using name_type = fsys::path;
     using data_type = std::vector<std::uint8_t>;
+    using buf_type  = data_type::const_pointer;
     using size_type = std::uint32_t;
 
     enum class byte_order : uint8_t
@@ -131,6 +132,10 @@ namespace engine::graphics
     byte_order mode()  const noexcept;
 
     colour_container colours() const noexcept;
+
+    const name_type& filename() const noexcept;
+
+    buf_type data() const noexcept;
 
   private:
     unsigned load() noexcept;
