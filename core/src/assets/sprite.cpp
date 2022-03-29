@@ -6,9 +6,10 @@ namespace engine::graphics
   // Special members
 
   sprite::sprite(name_type fname, byte_order byteOrder /* = png*/) noexcept :
+    m_name{ std::move(fname) },
     m_byteOrder{ byteOrder }
   {
-    const auto error = load(fname);
+    const auto error = load();
     if (error)
     {
       utils::unused(error);
@@ -43,11 +44,11 @@ namespace engine::graphics
 
   // Private members
 
-  unsigned sprite::load(name_type fname) noexcept
+  unsigned sprite::load() noexcept
   {
     auto w = 0u;
     auto h = 0u;
-    const auto error = lodepng::decode(m_data, w, h, fname.data());
+    const auto error = lodepng::decode(m_data, w, h, m_name.string().c_str());
 
     if (error)
     {

@@ -5,7 +5,7 @@ namespace engine::graphics
   class sprite
   {
   public:
-    using name_type = std::string_view;
+    using name_type = fsys::path;
     using data_type = std::vector<std::uint8_t>;
     using size_type = std::uint32_t;
 
@@ -133,10 +133,11 @@ namespace engine::graphics
     colour_container colours() const noexcept;
 
   private:
-    unsigned load(name_type fname) noexcept;
+    unsigned load() noexcept;
     void to_bmp_bytes() noexcept;
 
   private:
+    name_type m_name;
     data_type m_data;
     size_type m_width{};
     size_type m_height{};

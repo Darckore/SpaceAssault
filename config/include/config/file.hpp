@@ -5,7 +5,7 @@ namespace config
   class cfg_file
   {
   public:
-    using name_type   = std::string_view;
+    using name_type   = fsys::path;
     using line_type   = std::string_view;
     using char_type   = line_type::value_type;
     using in_type     = std::ifstream;
