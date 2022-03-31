@@ -142,6 +142,13 @@ namespace engine::graphics
         ID3D12CommandList* cmdList = m_cmdList.Get();
         m_cmdQueue->ExecuteCommandLists(1, &cmdList);
 
+        if (FAILED(m_swapChain->Present(1, 0)))
+        {
+          // todo: error
+          return false;
+        }
+
+        m_currentBuf = m_swapChain->GetCurrentBackBufferIndex();
         return true;
       }
 

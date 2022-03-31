@@ -59,14 +59,12 @@ namespace engine
         DispatchMessage(&msg);
       }
 
-      if (const auto dt = clock.peek(); past_frame(dt))
-      {
-        m_gfx.begin_frame();
-        m_game.update(clamp_time(dt));
-        clock();
-        m_game.render();
-        m_gfx.draw();
-      }
+      m_gfx.begin_frame();
+
+      m_game.update(clamp_time(clock()));
+      m_game.render();
+      
+      m_gfx.draw();
     }
   }
   void core::shutdown() noexcept
