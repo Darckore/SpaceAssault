@@ -17,7 +17,7 @@ namespace test_thingy
     static auto& get_sprite() noexcept
     {
       using engine::graphics::sprite;
-      static sprite s{ "data/assets/thing.png", sprite::bmp };
+      static sprite s{ "data/assets/thing.png" };
       return s;
     }
     static void step(level::camera_type& cam, float dt) noexcept
