@@ -1,7 +1,4 @@
 #pragma once
-#include "gfx/directx/d3d12.h"
-#include <dxgi1_6.h>
-#include <wrl.h>
 
 namespace engine::graphics
 {
@@ -52,10 +49,8 @@ namespace engine::graphics
 
   private:
     void init() noexcept;
-    void release() noexcept;
 
     pixel_type viewport_to_screen(const point_type& v) const noexcept;
-
     bitmap& to_bitmap(const sprite& s) noexcept;
 
   private:

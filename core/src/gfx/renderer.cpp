@@ -4,7 +4,10 @@
 #include "core/win_includes.hpp"
 #include "assets/sprite.hpp"
 
+#include "gfx/directx/d3d12.h"
 #include "gfx/directx/d3dx12.h"
+#include <dxgi1_6.h>
+#include <wrl.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
@@ -346,7 +349,6 @@ namespace engine::graphics
 
   renderer::~renderer() noexcept
   {
-    release();
     CoUninitialize();
   }
 
@@ -415,10 +417,6 @@ namespace engine::graphics
       // todo: error
       m_res.reset(nullptr);
     }
-  }
-  void renderer::release() noexcept
-  {
-    m_bitmapCache.clear();
   }
 
   renderer::pixel_type renderer::viewport_to_screen(const point_type& v) const noexcept
