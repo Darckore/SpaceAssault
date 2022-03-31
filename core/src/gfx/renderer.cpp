@@ -91,7 +91,9 @@ namespace engine::graphics
           && create_device()
           && create_cmd_queue()
           && create_swapchain()
-          && create_descriptor_heap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV)
+          && create_descriptor_heap()
+          && init_allocators()
+          && create_cmd_list()
           && update_rtvs()
         };
 
@@ -107,6 +109,27 @@ namespace engine::graphics
       }
 
     private:
+      com_ptr<ID3D12CommandAllocator> create_allocator() noexcept
+      {
+          com_ptr<ID3D12CommandAllocator> alloc;
+          m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&alloc));
+          return alloc;
+      }
+      bool init_allocators() noexcept
+      {
+        for (auto i = 0u; i < bufCnt; ++i)
+        {
+          auto alloc = create_allocator();
+          if (!alloc)
+          {
+            // todo: error
+            return false;
+          }
+          m_cmdAllocators[i] = alloc;
+        }
+        return true;
+      }
+
       bool enable_dbg() noexcept
       {
       #ifndef NDEBUG
@@ -205,6 +228,7 @@ namespace engine::graphics
         }
       #endif
 
+        m_RTVDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
         return true;
       }
       bool create_cmd_queue() noexcept
@@ -256,13 +280,14 @@ namespace engine::graphics
           return false;
         }
 
+        m_currentBuf = m_swapChain->GetCurrentBackBufferIndex();
         return true;
       }
-      bool create_descriptor_heap(D3D12_DESCRIPTOR_HEAP_TYPE type) noexcept
+      bool create_descriptor_heap() noexcept
       {
         D3D12_DESCRIPTOR_HEAP_DESC desc{};
         desc.NumDescriptors = bufCnt;
-        desc.Type           = type;
+        desc.Type           = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
         if(FAILED(m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_descriptorHeap))))
         {
@@ -272,10 +297,24 @@ namespace engine::graphics
 
         return true;
       }
+      
+      bool create_cmd_list() noexcept
+      {
+        auto alloc = m_cmdAllocators[m_currentBuf].Get();
+        auto res = m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT,
+                                               alloc, nullptr, IID_PPV_ARGS(&m_cmdList));
+        if (FAILED(res))
+        {
+          // todo: error
+          return false;
+        }
+
+        res = m_cmdList->Close();
+        return SUCCEEDED(res);
+      }
 
       bool update_rtvs() noexcept
       {
-        const auto descSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
         CD3DX12_CPU_DESCRIPTOR_HANDLE  rtvHandle{ m_descriptorHeap->GetCPUDescriptorHandleForHeapStart() };
 
         for (auto i = 0u; i < bufCnt; ++i)
@@ -285,7 +324,7 @@ namespace engine::graphics
           {
             m_device->CreateRenderTargetView(buf.Get(), nullptr, rtvHandle);
             m_backBuffers[i] = buf;
-            rtvHandle.Offset(descSize);
+            rtvHandle.Offset(static_cast<INT>(m_RTVDescriptorSize));
             continue;
           }
 
