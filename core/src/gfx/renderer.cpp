@@ -61,7 +61,6 @@ namespace engine::graphics
     class resources
     {
     public:
-      using handle_type = HANDLE;
       using size_type   = std::size_t;
 
       template <typename T>
@@ -92,9 +91,9 @@ namespace engine::graphics
           && create_cmd_queue()
           && create_swapchain()
           && create_descriptor_heap()
+          && update_rtvs()
           && init_allocators()
           && create_cmd_list()
-          && update_rtvs()
         };
 
         if (!success)
@@ -108,7 +107,58 @@ namespace engine::graphics
         return static_cast<bool>(m_device);
       }
 
+    public:
+      void begin_frame() noexcept
+      {
+        auto alloc = m_cmdAllocators[m_currentBuf].Get();
+        auto buf   = m_backBuffers[m_currentBuf].Get();
+        alloc->Reset();
+        m_cmdList->Reset(alloc, nullptr);
+
+        auto barrier = barrier_before(buf); 
+        m_cmdList->ResourceBarrier(1, &barrier);
+
+        FLOAT backClr[] = { 0.4f, 0.6f, 0.9f, 1.0f };
+        CD3DX12_CPU_DESCRIPTOR_HANDLE rtv { 
+            m_descriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+            static_cast<INT>(m_currentBuf),
+            static_cast<UINT>(m_RTVDescriptorSize)
+        };
+
+        m_cmdList->ClearRenderTargetView(rtv, backClr, 0, nullptr);
+      }
+      bool end_frame() noexcept
+      {
+        auto buf     = m_backBuffers[m_currentBuf].Get();
+        auto barrier = barrier_after(buf);
+        m_cmdList->ResourceBarrier(1, &barrier);
+
+        if (FAILED(m_cmdList->Close()))
+        {
+          // todo: error
+          return false;
+        }
+
+        ID3D12CommandList* cmdList = m_cmdList.Get();
+        m_cmdQueue->ExecuteCommandLists(1, &cmdList);
+
+        return true;
+      }
+
     private:
+      CD3DX12_RESOURCE_BARRIER barrier_before(ID3D12Resource* resource) noexcept
+      {
+        return CD3DX12_RESOURCE_BARRIER::Transition(resource,
+                                          D3D12_RESOURCE_STATE_PRESENT,
+                                          D3D12_RESOURCE_STATE_RENDER_TARGET);
+      }
+      CD3DX12_RESOURCE_BARRIER barrier_after(ID3D12Resource* resource) noexcept
+      {
+        return CD3DX12_RESOURCE_BARRIER::Transition(resource,
+                                          D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                          D3D12_RESOURCE_STATE_PRESENT);
+      }
+
       com_ptr<ID3D12CommandAllocator> create_allocator() noexcept
       {
           com_ptr<ID3D12CommandAllocator> alloc;
@@ -297,7 +347,6 @@ namespace engine::graphics
 
         return true;
       }
-      
       bool create_cmd_list() noexcept
       {
         auto alloc = m_cmdAllocators[m_currentBuf].Get();
@@ -351,11 +400,6 @@ namespace engine::graphics
 
       size_type m_RTVDescriptorSize;
       size_type m_currentBuf;
-
-      com_ptr<ID3D12Fence> m_fence{};
-      arr_type<size_type>  m_fenceVals{};
-      size_type   m_fenceCur{};
-      handle_type m_FenceEvent;
     };
 
   }
@@ -418,13 +462,15 @@ namespace engine::graphics
 
   void renderer::init_drawing() noexcept
   {
-    //m_target->BeginDraw();
-    //m_target->Clear(D2D1::ColorF{ D2D1::ColorF::AntiqueWhite });
+    m_res->begin_frame();
   }
   void renderer::end_drawing() noexcept
   {
-    //auto res = m_target->EndDraw();
-    //utils::unused(res);
+    if (!m_res->end_frame())
+    {
+      // todo: error
+      m_res.reset(nullptr);
+    }
   }
 
   // Draw stuff

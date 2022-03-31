@@ -64,10 +64,9 @@ namespace engine
         m_gfx.begin_frame();
         m_game.update(clamp_time(dt));
         clock();
+        m_game.render();
+        m_gfx.draw();
       }
-
-      m_game.render();
-      m_gfx.draw();
     }
   }
   void core::shutdown() noexcept
