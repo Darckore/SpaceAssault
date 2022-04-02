@@ -59,12 +59,21 @@ namespace engine
         DispatchMessage(&msg);
       }
 
+      if (!m_gfx)
+      {
+        // todo: error
+        shutdown();
+      }
+
       m_gfx.begin_frame();
 
       m_game.update(clamp_time(clock()));
       m_game.render();
       
-      m_gfx.draw();
+      if (m_gfx)
+      {
+        m_gfx.draw();
+      }
     }
   }
   void core::shutdown() noexcept

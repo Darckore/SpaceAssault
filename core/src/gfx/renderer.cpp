@@ -536,11 +536,15 @@ namespace engine::graphics
 
   void renderer::init_drawing() noexcept
   {
-    m_res->begin_frame();
+    if (!m_res || !m_res->begin_frame())
+    {
+      // todo: error
+      m_res.reset(nullptr);
+    }
   }
   void renderer::end_drawing() noexcept
   {
-    if (!m_res->end_frame())
+    if (!m_res || !m_res->end_frame())
     {
       // todo: error
       m_res.reset(nullptr);
