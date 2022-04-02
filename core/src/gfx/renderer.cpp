@@ -77,7 +77,10 @@ namespace engine::graphics
     public:
       CLASS_SPECIALS_NONE(resources);
 
-      ~resources() = default;
+      ~resources() noexcept
+      {
+        CloseHandle(m_fenceEvent);
+      }
 
       resources(const window& wnd) noexcept :
         m_wnd{ wnd }
@@ -94,6 +97,7 @@ namespace engine::graphics
           && update_rtvs()
           && init_allocators()
           && create_cmd_list()
+          && create_fences()
         };
 
         if (!success)
@@ -108,12 +112,20 @@ namespace engine::graphics
       }
 
     public:
-      void begin_frame() noexcept
+      bool begin_frame() noexcept
       {
         auto alloc = m_cmdAllocators[m_currentBuf].Get();
         auto buf   = m_backBuffers[m_currentBuf].Get();
-        alloc->Reset();
-        m_cmdList->Reset(alloc, nullptr);
+        if (FAILED(alloc->Reset()))
+        {
+          // todo: error
+          return false;
+        }
+        if (FAILED(m_cmdList->Reset(alloc, nullptr)))
+        {
+          // todo: error
+          return false;
+        }
 
         auto barrier = barrier_before(buf); 
         m_cmdList->ResourceBarrier(1, &barrier);
@@ -126,6 +138,7 @@ namespace engine::graphics
         };
 
         m_cmdList->ClearRenderTargetView(rtv, backClr, 0, nullptr);
+        return true;
       }
       bool end_frame() noexcept
       {
@@ -142,12 +155,23 @@ namespace engine::graphics
         ID3D12CommandList* cmdList = m_cmdList.Get();
         m_cmdQueue->ExecuteCommandLists(1, &cmdList);
 
+        if (FAILED(m_cmdQueue->Signal(m_fences[m_currentBuf].Get(), m_fenceVals[m_currentBuf])))
+        {
+          // todo: error
+          return false;
+        }
+        
         if (FAILED(m_swapChain->Present(1, 0)))
         {
           // todo: error
           return false;
         }
 
+        if (!wait())
+        {
+          // todo: error
+          return false;
+        }
         m_currentBuf = m_swapChain->GetCurrentBackBufferIndex();
         return true;
       }
@@ -368,6 +392,26 @@ namespace engine::graphics
         res = m_cmdList->Close();
         return SUCCEEDED(res);
       }
+      bool create_fences() noexcept
+      {
+        for (auto idx = 0ull; idx < bufCnt; ++idx)
+        {
+          if (FAILED(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fences[idx]))))
+          {
+            // todo: error
+            return false;
+          }
+        }
+
+        m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        if(!m_fenceEvent)
+        {
+          // todo: error
+          return false;
+        }
+
+        return true;
+      }
 
       bool update_rtvs() noexcept
       {
@@ -391,6 +435,25 @@ namespace engine::graphics
         return true;
       }
 
+      bool wait() noexcept
+      {
+        auto fence   = m_fences[m_currentBuf].Get();
+        auto&& value = m_fenceVals[m_currentBuf];
+        if (fence->GetCompletedValue() < value)
+        {
+          if (FAILED(fence->SetEventOnCompletion(value, m_fenceEvent)))
+          {
+            // todo: error
+            return false;
+          }
+
+          WaitForSingleObject(m_fenceEvent, INFINITE);
+        }
+
+        ++value;
+        return true;
+      }
+
     private:
       const window& m_wnd;
 
@@ -405,8 +468,12 @@ namespace engine::graphics
       ptr_arr<ID3D12Resource>         m_backBuffers{};
       ptr_arr<ID3D12CommandAllocator> m_cmdAllocators{};
 
-      size_type m_RTVDescriptorSize;
-      size_type m_currentBuf;
+      size_type m_RTVDescriptorSize{};
+      size_type m_currentBuf{};
+
+      ptr_arr<ID3D12Fence> m_fences{};
+      arr_type<size_type> m_fenceVals{};
+      HANDLE m_fenceEvent{};
     };
 
   }
