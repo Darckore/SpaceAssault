@@ -21,44 +21,10 @@ namespace engine::graphics
   namespace detail
   {
     //////////////
-    //  bitmap
+    //  pipeline
     //////////////
 
-    class bitmap
-    {
-    public:
-      using value_type = void*;
-
-    public:
-      CLASS_SPECIALS_NONE(bitmap);
-
-      ~bitmap() noexcept = default;
-
-      bitmap(void* target, const sprite& s) noexcept
-      {
-        utils::unused(target, s);
-      }
-
-      explicit operator bool() const noexcept
-      {
-        return static_cast<bool>(m_bitmap);
-      }
-
-      value_type operator->() noexcept
-      {
-        return m_bitmap;
-      }
-
-    private:
-      value_type m_bitmap{};
-    };
-
-
-    //////////////
-    //  resources
-    //////////////
-
-    class resources
+    class pipeline
     {
     public:
       using size_type   = std::size_t;
@@ -75,14 +41,14 @@ namespace engine::graphics
       using ptr_arr = arr_type<com_ptr<T>>;
 
     public:
-      CLASS_SPECIALS_NONE(resources);
+      CLASS_SPECIALS_NONE(pipeline);
 
-      ~resources() noexcept
+      ~pipeline() noexcept
       {
         CloseHandle(m_fenceEvent);
       }
 
-      resources(const window& wnd) noexcept :
+      pipeline(const window& wnd) noexcept :
         m_wnd{ wnd }
       {
         const bool success
@@ -523,7 +489,7 @@ namespace engine::graphics
 
   renderer::operator bool() const noexcept
   {
-    return static_cast<bool>(m_res);
+    return static_cast<bool>(m_pipeline);
   }
 
   // Public members
@@ -536,18 +502,18 @@ namespace engine::graphics
 
   void renderer::init_drawing() noexcept
   {
-    if (!m_res || !m_res->begin_frame())
+    if (!m_pipeline || !m_pipeline->begin_frame())
     {
       // todo: error
-      m_res.reset(nullptr);
+      m_pipeline.reset(nullptr);
     }
   }
   void renderer::end_drawing() noexcept
   {
-    if (!m_res || !m_res->end_frame())
+    if (!m_pipeline || !m_pipeline->end_frame())
     {
       // todo: error
-      m_res.reset(nullptr);
+      m_pipeline.reset(nullptr);
     }
   }
 
@@ -556,29 +522,18 @@ namespace engine::graphics
   // stupid test code
   void renderer::image(const sprite& s, const point_type& pos, const point_type& dir) noexcept
   {
-    if (!s)
-    {
-      return;
-    }
-
-    auto&& bm = to_bitmap(s);
-    if (!bm)
-    {
-      return;
-    }
-
-    utils::unused(pos, dir);
+    utils::unused(s, pos, dir);
   }
 
   // Private members
 
   void renderer::init() noexcept
   {
-    m_res = std::make_unique<detail::resources>(m_wnd);
-    if (!(*m_res))
+    m_pipeline = std::make_unique<detail::pipeline>(m_wnd);
+    if (!(*m_pipeline))
     {
       // todo: error
-      m_res.reset(nullptr);
+      m_pipeline.reset(nullptr);
     }
   }
 
@@ -591,15 +546,4 @@ namespace engine::graphics
     return { x, y };
   }
 
-  renderer::bitmap& renderer::to_bitmap(const sprite& s) noexcept
-  {
-    const auto key = fsys::hash_value(s.filename());
-    if (auto item = m_bitmapCache.find(key); item != m_bitmapCache.end())
-    {
-      return item->second;
-    }
-
-    auto newitem = m_bitmapCache.try_emplace(key, nullptr, s);
-    return newitem.first->second;
-  }
 }

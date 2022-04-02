@@ -8,8 +8,7 @@ namespace engine::graphics
 
   namespace detail
   {
-    class bitmap;
-    class resources;
+    class pipeline;
   }
 
   class renderer
@@ -19,9 +18,7 @@ namespace engine::graphics
     using storage_type = std::unordered_map<const gfx*, renderer>;
     using point_type   = utils::vecd2;
     using pixel_type   = utils::vecf2;
-    using bitmap       = detail::bitmap;
-    using resource_ptr = std::unique_ptr<detail::resources>;
-    using sprite_map   = std::unordered_map<size_type, bitmap>;
+    using pipeline_ptr = std::unique_ptr<detail::pipeline>;
 
   public:
     static renderer& get(const gfx* g, const window& wnd) noexcept;
@@ -51,12 +48,10 @@ namespace engine::graphics
     void init() noexcept;
 
     pixel_type viewport_to_screen(const point_type& v) const noexcept;
-    bitmap& to_bitmap(const sprite& s) noexcept;
 
   private:
     const window& m_wnd;
-    resource_ptr m_res;
-    sprite_map m_bitmapCache;
+    pipeline_ptr m_pipeline;
   };
 
 }
