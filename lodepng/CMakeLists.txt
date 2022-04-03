@@ -5,7 +5,7 @@ project(${TARGET_NAME} CXX)
 
 collect_sources(SOURCE_FILES HEADERS ADDITIONAL_FILES)
 add_library(${TARGET_NAME} STATIC ${SOURCE_FILES} ${HEADERS} ${OPT_PCH_NAME} ${ADDITIONAL_FILES})
-set_build_opts(${TARGET_NAME})
+set_build_opts(${TARGET_NAME} "${ADDITIONAL_FILES}")
 
 if(MSVC)
   target_compile_options(${TARGET_NAME} PRIVATE /W0 /JMC $<$<CONFIG:RELEASE>:/GL /Ot /Oi>)
