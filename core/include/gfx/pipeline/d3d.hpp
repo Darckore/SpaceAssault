@@ -6,7 +6,7 @@
 #include <dxgi1_6.h>
 #include <wrl.h>
 #include <d3dcompiler.h>
-#include <DirectXMath.h>
+#include <directxmath.h>
 
 namespace engine::graphics::detail
 {
@@ -26,6 +26,13 @@ namespace engine::graphics::detail
     template <typename T>
     using ptr_arr = arr_type<com_ptr<T>>;
 
+    using vertex_pos = DirectX::XMFLOAT2;
+
+    struct vertex
+    {
+      vertex_pos pos;
+    };
+
   public:
     CLASS_SPECIALS_NONE(pipeline);
 
@@ -37,19 +44,9 @@ namespace engine::graphics::detail
     pipeline(const window& wnd) noexcept :
       m_wnd{ wnd }
     {
-      const bool success
-      {
-           static_cast<bool>(m_wnd)
-        && enable_dbg()
-        && create_adapter()
-        && create_device()
-        && create_cmd_queue()
-        && create_swapchain()
-        && create_descriptor_heap()
-        && update_rtvs()
-        && init_allocators()
-        && create_cmd_list()
-        && create_fences()
+      const bool success {
+           init_pipeline()
+        && init_drawing()
       };
 
       if (!success)
@@ -129,6 +126,23 @@ namespace engine::graphics::detail
     }
 
   private:
+    bool init_pipeline() noexcept
+    {
+      return {
+           static_cast<bool>(m_wnd)
+        && enable_dbg()
+        && create_adapter()
+        && create_device()
+        && create_cmd_queue()
+        && create_swapchain()
+        && create_descriptor_heap()
+        && update_rtvs()
+        && init_allocators()
+        && create_cmd_list()
+        && create_fences()
+      };
+    }
+
     CD3DX12_RESOURCE_BARRIER barrier_before(ID3D12Resource* resource) noexcept
     {
       return CD3DX12_RESOURCE_BARRIER::Transition(resource,
@@ -407,6 +421,44 @@ namespace engine::graphics::detail
     }
 
   private:
+    bool init_drawing() noexcept
+    {
+      return {
+        create_rs()
+      };
+    }
+
+    bool create_rs() noexcept
+    {
+      CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+      rootSignatureDesc.Init(0, nullptr, 0, nullptr,
+                             D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+      ID3DBlob* signature;
+      auto res = D3D12SerializeRootSignature(&rootSignatureDesc,
+                                             D3D_ROOT_SIGNATURE_VERSION_1,
+                                             &signature,
+                                             nullptr);
+      if (FAILED(res))
+      {
+        // todo: error
+        return false;
+      }
+
+      res = m_device->CreateRootSignature(0,
+                                          signature->GetBufferPointer(),
+                                          signature->GetBufferSize(),
+                                          IID_PPV_ARGS(&m_rootSignature));
+      if (FAILED(res))
+      {
+        // todo: error
+        return false;
+      }
+
+      return true;
+    }
+
+  private:
     const window& m_wnd;
 
     com_ptr<IDXGIFactory4>               m_factory{};
@@ -426,6 +478,14 @@ namespace engine::graphics::detail
     ptr_arr<ID3D12Fence> m_fences{};
     arr_type<size_type> m_fenceVals{};
     HANDLE m_fenceEvent{};
+
+    com_ptr<ID3D12PipelineState> m_stateObj{};
+    com_ptr<ID3D12RootSignature> m_rootSignature{};
+    com_ptr<ID3D12Resource>      m_vertexBuf{};
+    D3D12_VERTEX_BUFFER_VIEW     m_vertexView{};
+    
+    D3D12_VIEWPORT m_viewport{};
+    D3D12_RECT     m_scissorRect{};
   };
 
 }
