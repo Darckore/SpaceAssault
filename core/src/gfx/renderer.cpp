@@ -8,6 +8,7 @@
 
 #pragma comment (lib, "d3d12.lib")
 #pragma comment (lib, "dxgi.lib")
+#pragma comment (lib, "d3dcompiler.lib")
 
 namespace engine::graphics
 {
@@ -97,7 +98,7 @@ namespace engine::graphics
   void renderer::init() noexcept
   {
     m_pipeline = std::make_unique<detail::pipeline>(m_wnd);
-    if (!(*m_pipeline))
+    if (!*m_pipeline)
     {
       // todo: error
       m_pipeline.reset(nullptr);

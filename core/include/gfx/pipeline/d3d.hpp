@@ -10,46 +10,37 @@
 
 namespace engine::graphics::detail
 {
-  class pipeline
+  using size_type = std::uint64_t;
+  
+  template <typename T>
+  using com_ptr = Microsoft::WRL::ComPtr<T>;
+  
+  inline constexpr auto bufCnt = 3u;
+  
+  template <typename T>
+  using arr_type = std::array<T, bufCnt>;
+  
+  template <typename T>
+  using ptr_arr = arr_type<com_ptr<T>>;
+
+  ////////////////////
+  // Direct3D target
+  ////////////////////
+
+  class target
   {
   public:
-    using size_type = std::size_t;
+    CLASS_SPECIALS_NONE(target);
 
-    template <typename T>
-    using com_ptr = Microsoft::WRL::ComPtr<T>;
-
-    static constexpr auto bufCnt = 3u;
-
-    template <typename T>
-    using arr_type = std::array<T, bufCnt>;
-
-    template <typename T>
-    using ptr_arr = arr_type<com_ptr<T>>;
-
-    using vertex_pos = DirectX::XMFLOAT2;
-
-    struct vertex
-    {
-      vertex_pos pos;
-    };
-
-  public:
-    CLASS_SPECIALS_NONE(pipeline);
-
-    ~pipeline() noexcept
+    ~target() noexcept
     {
       CloseHandle(m_fenceEvent);
     }
 
-    pipeline(const window& wnd) noexcept :
+    target(const window& wnd) noexcept :
       m_wnd{ wnd }
     {
-      const bool success {
-           init_pipeline()
-        && init_drawing()
-      };
-
-      if (!success)
+      if (!init_pipeline())
       {
         m_device = nullptr;
       }
@@ -60,9 +51,18 @@ namespace engine::graphics::detail
       return static_cast<bool>(m_device);
     }
 
-  public:
+    ID3D12Device2* operator->() noexcept
+    {
+      return m_device.Get();
+    }
+
     bool begin_frame() noexcept
     {
+      if (!*this)
+      {
+        return false;
+      }
+
       auto alloc = m_cmdAllocators[m_currentBuf].Get();
       auto buf = m_backBuffers[m_currentBuf].Get();
       if (FAILED(alloc->Reset()))
@@ -91,6 +91,11 @@ namespace engine::graphics::detail
     }
     bool end_frame() noexcept
     {
+      if (!*this)
+      {
+        return false;
+      }
+
       auto buf = m_backBuffers[m_currentBuf].Get();
       auto barrier = barrier_after(buf);
       m_cmdList->ResourceBarrier(1, &barrier);
@@ -420,47 +425,9 @@ namespace engine::graphics::detail
       return true;
     }
 
-  private:
-    bool init_drawing() noexcept
-    {
-      return {
-        create_rs()
-      };
-    }
-
-    bool create_rs() noexcept
-    {
-      CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
-      rootSignatureDesc.Init(0, nullptr, 0, nullptr,
-                             D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-      ID3DBlob* signature;
-      auto res = D3D12SerializeRootSignature(&rootSignatureDesc,
-                                             D3D_ROOT_SIGNATURE_VERSION_1,
-                                             &signature,
-                                             nullptr);
-      if (FAILED(res))
-      {
-        // todo: error
-        return false;
-      }
-
-      res = m_device->CreateRootSignature(0,
-                                          signature->GetBufferPointer(),
-                                          signature->GetBufferSize(),
-                                          IID_PPV_ARGS(&m_rootSignature));
-      if (FAILED(res))
-      {
-        // todo: error
-        return false;
-      }
-
-      return true;
-    }
-
-  private:
     const window& m_wnd;
 
+  public:
     com_ptr<IDXGIFactory4>               m_factory{};
     com_ptr<IDXGIAdapter4>               m_adapter{};
     com_ptr<ID3D12Device2>               m_device{};
@@ -478,6 +445,176 @@ namespace engine::graphics::detail
     ptr_arr<ID3D12Fence> m_fences{};
     arr_type<size_type> m_fenceVals{};
     HANDLE m_fenceEvent{};
+  };
+
+
+  ////////////////////
+  // Direct3D pipeline
+  ////////////////////
+
+  class pipeline
+  {
+  public:
+    CLASS_SPECIALS_NONE(pipeline);
+
+    ~pipeline() noexcept = default;
+
+    pipeline(const window& wnd) noexcept :
+      m_wnd{ wnd },
+      m_target{ m_wnd }
+    {
+      init_drawing();
+    }
+
+    explicit operator bool() const noexcept
+    {
+      return static_cast<bool>(m_target);
+    }
+
+  public:
+    bool begin_frame() noexcept
+    {
+      return m_target.begin_frame();
+    }
+    bool end_frame() noexcept
+    {
+      return m_target.end_frame();
+    }
+
+  private:
+    bool init_drawing() noexcept
+    {
+      return {
+           create_rs()
+        && load_shaders()
+        && create_state()
+      };
+    }
+
+    bool create_rs() noexcept
+    {
+      CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+      rootSignatureDesc.Init(0, nullptr, 0, nullptr,
+                             D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+      com_ptr<ID3DBlob> signature{};
+      auto res = D3D12SerializeRootSignature(&rootSignatureDesc,
+                                             D3D_ROOT_SIGNATURE_VERSION_1,
+                                             &signature,
+                                             nullptr);
+      if (FAILED(res))
+      {
+        // todo: error
+        return false;
+      }
+
+      res = m_target->CreateRootSignature(0,
+                                          signature->GetBufferPointer(),
+                                          signature->GetBufferSize(),
+                                          IID_PPV_ARGS(&m_rootSignature));
+      if (FAILED(res))
+      {
+        // todo: error
+        return false;
+      }
+
+      return true;
+    }
+    bool load_shaders() noexcept
+    {
+      // vertex shader
+      auto res = D3DCompileFromFile(L"data/assets/shaders/vertex.hlsl",
+                                    nullptr,
+                                    nullptr,
+                                    "main",
+                                    "vs_5_0",
+                                    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+                                    0,
+                                    &m_vertexShader,
+                                    nullptr);
+      if (FAILED(res))
+      {
+        // todo: error
+        return false;
+      }
+
+      // pixel shader
+      com_ptr<ID3DBlob> pixelShader{};
+      res = D3DCompileFromFile(L"data/assets/shaders/pixel.hlsl",
+                              nullptr,
+                              nullptr,
+                              "main",
+                              "ps_5_0",
+                              D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+                              0,
+                              &m_pixelShader,
+                              nullptr);
+      if (FAILED(res))
+      {
+        // todo: error
+        return false;
+      }
+
+      return true;
+    }
+    bool create_state() noexcept
+    {
+      D3D12_INPUT_ELEMENT_DESC inputLayout[] {
+        {
+          "POSITION",
+          0,
+          DXGI_FORMAT_R32G32B32_FLOAT,
+          0,
+          0,
+          D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+          0
+        }
+      };
+
+      D3D12_INPUT_LAYOUT_DESC layoutDesc{};
+      layoutDesc.NumElements = sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC);
+      layoutDesc.pInputElementDescs = inputLayout;
+
+      D3D12_SHADER_BYTECODE vsCode{};
+      vsCode.BytecodeLength =  m_vertexShader->GetBufferSize();
+      vsCode.pShaderBytecode = m_vertexShader->GetBufferPointer();
+
+      D3D12_SHADER_BYTECODE psCode{};
+      psCode.BytecodeLength =  m_pixelShader->GetBufferSize();
+      psCode.pShaderBytecode = m_pixelShader->GetBufferPointer();
+
+      DXGI_SAMPLE_DESC sampleDesc{};
+      sampleDesc.Count = 1;
+
+      D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
+      psoDesc.InputLayout    = layoutDesc;
+      psoDesc.pRootSignature = m_rootSignature.Get();
+      psoDesc.VS = vsCode;
+      psoDesc.PS = psCode;
+      psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+      psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+      psoDesc.SampleDesc = sampleDesc;
+      psoDesc.SampleMask = 0xffffffff;
+      psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC{ D3D12_DEFAULT };
+      psoDesc.BlendState = CD3DX12_BLEND_DESC{ D3D12_DEFAULT };
+      psoDesc.NumRenderTargets = 1;
+      
+      if (FAILED(m_target->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_stateObj))))
+      {
+        // todo: error
+        return false;
+      }
+
+      return true;
+    }
+
+  private:
+    const window& m_wnd;
+
+    target m_target;
+
+    com_ptr<ID3DBlob> m_vertexShader{};
+    com_ptr<ID3DBlob> m_pixelShader{};
 
     com_ptr<ID3D12PipelineState> m_stateObj{};
     com_ptr<ID3D12RootSignature> m_rootSignature{};
