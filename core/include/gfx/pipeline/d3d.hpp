@@ -427,7 +427,6 @@ namespace engine::graphics::detail
 
     const window& m_wnd;
 
-  public:
     com_ptr<IDXGIFactory4>               m_factory{};
     com_ptr<IDXGIAdapter4>               m_adapter{};
     com_ptr<ID3D12Device2>               m_device{};
