@@ -30,8 +30,13 @@ namespace engine
 
   protected:
     virtual bool before_run() noexcept = 0;
-    virtual void update(time_type dt) noexcept = 0;
-    virtual void render() noexcept = 0;
+    virtual void on_update(time_type dt) noexcept = 0;
+    virtual void on_render() noexcept = 0;
+
+  private:
+    bool init() noexcept;
+    void update(time_type dt) noexcept;
+    void render() noexcept;
 
   protected:
     void run() noexcept;

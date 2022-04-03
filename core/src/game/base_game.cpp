@@ -10,6 +10,30 @@ namespace engine
   {
   }
 
+  // Private members
+
+  bool base_game::init() noexcept
+  {
+    if (!before_run())
+    {
+      // todo: error
+      return false;
+    }
+
+    update(time_type{});
+    return true;
+  }
+  void base_game::update(time_type dt) noexcept
+  {
+    scene().update(dt);
+    on_update(dt);
+  }
+  void base_game::render() noexcept
+  {
+    scene().render();
+    on_render();
+  }
+
   // Protected members
 
   void base_game::run() noexcept

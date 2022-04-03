@@ -20,7 +20,7 @@ namespace assault::game
 
   private:
     virtual bool before_run() noexcept override;
-    virtual void update(time_type dt) noexcept override;
-    virtual void render() noexcept override;
+    virtual void on_update(time_type dt) noexcept override;
+    virtual void on_render() noexcept override;
   };
 }

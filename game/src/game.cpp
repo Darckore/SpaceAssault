@@ -40,12 +40,11 @@ namespace assault::game
 
     return switch_scene(lvl);
   }
-  void game::update(time_type dt) noexcept
+  void game::on_update(time_type dt) noexcept
   {
-    scene().update(dt);
+    utils::unused(dt);
   }
-  void game::render() noexcept
+  void game::on_render() noexcept
   {
-    scene().render();
   }
 }

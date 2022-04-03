@@ -38,12 +38,11 @@ namespace engine
       return;
     }
 
-    if (!m_game.before_run())
+    if (!m_game.init())
     {
       return;
     }
 
-    m_game.update(time_type{});
     loop();
   }
   void core::loop() noexcept
