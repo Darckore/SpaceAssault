@@ -19,7 +19,7 @@ namespace engine::graphics
 
   gfx::operator bool() const noexcept
   {
-    return m_wnd && m_renderer;
+    return static_cast<bool>(m_renderer);
   }
 
   // Public members
@@ -47,11 +47,11 @@ namespace engine::graphics
   }
 
   // stupid test code
-  void gfx::draw(const vertex_type& v1, const vertex_type& v2) noexcept
+  void gfx::draw(const sprite& s, const vertex_type& pos, const vertex_type& dir) noexcept
   {
-    const auto cv1 = world_to_viewport(v1);
-    const auto cv2 = world_to_viewport(v2);
-    m_renderer->line(cv1, cv2);
+    const auto p1 = world_to_viewport(pos);
+    const auto d1 = world_to_viewport(dir).get_normalised();
+    m_renderer.image(s, p1, dir);
   }
 
   // Private members
@@ -59,11 +59,11 @@ namespace engine::graphics
   void gfx::begin_frame() noexcept
   {
     setup();
-    m_renderer->init_drawing();
+    m_renderer.init_drawing();
   }
   void gfx::draw() noexcept
   {
-    m_renderer->end_drawing();
+    m_renderer.end_drawing();
   }
   void gfx::setup() noexcept
   {
@@ -75,15 +75,12 @@ namespace engine::graphics
 
     m_size = wndSize;
     m_aspect = calc_aspect_ratio();
-    m_renderer->reset();
+    m_renderer.resize();
   }
 
-  renderer* gfx::get_renderer() noexcept
+  renderer& gfx::get_renderer() noexcept
   {
-    if (!m_wnd)
-      return {};
-
-    return &renderer::get(this, m_wnd);
+    return renderer::get(this, m_wnd);
   }
   void gfx::release_renderer() noexcept
   {

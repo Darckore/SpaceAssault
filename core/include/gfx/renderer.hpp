@@ -4,63 +4,21 @@ namespace engine::graphics
 {
   class window;
   class gfx;
+  class sprite;
 
-  class buffer
+  namespace detail
   {
-  public:
-    using handle_type = void*;
-
-  public:
-    friend class renderer;
-
-    CLASS_SPECIALS_ALL_CUSTOM(buffer);
-
-  private:
-    buffer() = default;
-
-  private:
-    void init_buffers(const window& wnd) noexcept;
-    void kill_buffers(const window& wnd) noexcept;
-
-    void clear(const window& wnd) noexcept;
-    void swap(const window& wnd) noexcept;
-
-  public:
-    template <typename To>
-    auto active_buf() const noexcept
-    {
-      return reinterpret_cast<To>(m_cur);
-    }
-    template <typename To>
-    auto prev_buf() const noexcept
-    {
-      return reinterpret_cast<To>(m_prev);
-    }
-    template <typename To>
-    auto device() const noexcept
-    {
-      return reinterpret_cast<To>(m_device);
-    }
-    template <typename To>
-    auto wnd_device() const noexcept
-    {
-      return reinterpret_cast<To>(m_wndDevice);
-    }
-
-  private:
-    handle_type m_prev{};
-    handle_type m_cur{};
-
-    handle_type m_device{};
-    handle_type m_wndDevice{};
-  };
+    class pipeline;
+  }
 
   class renderer
   {
   private:
+    using size_type    = std::size_t;
     using storage_type = std::unordered_map<const gfx*, renderer>;
     using point_type   = utils::vecd2;
-    using pixel_type   = utils::point2d;
+    using pixel_type   = utils::vecf2;
+    using pipeline_ptr = std::unique_ptr<detail::pipeline>;
 
   public:
     static renderer& get(const gfx* g, const window& wnd) noexcept;
@@ -76,24 +34,24 @@ namespace engine::graphics
 
     renderer(const window& wnd) noexcept;
 
-  public:
-    void reset() noexcept;
+    explicit operator bool() const noexcept;
 
+  public:
+    void resize() noexcept;
     void init_drawing() noexcept;
     void end_drawing() noexcept;
 
     //stupid test code
-    void line(const point_type& v1, const point_type& v2) noexcept;
+    void image(const sprite& s, const point_type& pos, const point_type& dir) noexcept;
 
   private:
     void init() noexcept;
-    void release() noexcept;
 
     pixel_type viewport_to_screen(const point_type& v) const noexcept;
 
   private:
     const window& m_wnd;
-    buffer m_buf;
+    pipeline_ptr m_pipeline;
   };
 
 }

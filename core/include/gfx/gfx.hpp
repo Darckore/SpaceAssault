@@ -1,6 +1,5 @@
 #pragma once
 #include "gfx/window.hpp"
-#include "core/err.hpp"
 
 namespace engine
 {
@@ -11,21 +10,12 @@ namespace engine::graphics
 {
   class window;
   class renderer;
+  class sprite;
 
   class gfx
   {
   public:
     friend class engine::core;
-
-  public:
-    class gfx_error : public err::error
-    {
-    public:
-      static constexpr auto prefix = "gfx"sv;
-
-    public:
-      using error::error;
-    };
 
   public:
     using viewport_size  = window::dimensions;
@@ -54,14 +44,14 @@ namespace engine::graphics
 
   public:
     // stupid test code
-    void draw(const vertex_type& v1, const vertex_type& v2) noexcept;
+    void draw(const sprite& s, const vertex_type& pos, const vertex_type& dir) noexcept;
 
   private:
     void begin_frame() noexcept;
     void draw() noexcept;
     void setup() noexcept;
 
-    renderer* get_renderer() noexcept;
+    renderer& get_renderer() noexcept;
     void release_renderer() noexcept;
 
     ratio_type calc_aspect_ratio() const noexcept;
@@ -70,7 +60,7 @@ namespace engine::graphics
 
   private:
     window& m_wnd;
-    renderer* m_renderer;
+    renderer& m_renderer;
     viewport_size m_size{};
     ratio_type m_aspect{};
     vertex_type m_origin{};

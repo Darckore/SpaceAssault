@@ -6,7 +6,7 @@ namespace config
   // Special members
 
   cfg::cfg(file_name fname) noexcept :
-    m_file{ fname },
+    m_file{ std::move(fname) },
     m_root{ parser::root_name }
   {
     read();

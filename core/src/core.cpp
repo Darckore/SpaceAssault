@@ -38,12 +38,11 @@ namespace engine
       return;
     }
 
-    if (!m_game.before_run())
+    if (!m_game.init())
     {
       return;
     }
 
-    m_game.update(time_type{});
     loop();
   }
   void core::loop() noexcept
@@ -59,15 +58,21 @@ namespace engine
         DispatchMessage(&msg);
       }
 
-      if (const auto dt = clock.peek(); past_frame(dt))
+      if (!m_gfx)
       {
-        m_gfx.begin_frame();
-        m_game.update(clamp_time(dt));
-        clock();
+        // todo: error
+        shutdown();
       }
 
+      m_gfx.begin_frame();
+
+      m_game.update(clamp_time(clock()));
       m_game.render();
-      m_gfx.draw();
+      
+      if (m_gfx)
+      {
+        m_gfx.draw();
+      }
     }
   }
   void core::shutdown() noexcept

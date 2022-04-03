@@ -9,6 +9,7 @@ namespace engine::graphics
   {
     auto inst_handle = GetModuleHandle(0);
     DestroyWindow(handle<HWND>());
+    m_handle = nullptr;
     UnregisterClass(m_name.c_str(), inst_handle);
   }
 

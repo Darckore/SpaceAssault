@@ -5,7 +5,7 @@ namespace config
   // Special members
 
   cfg_file::cfg_file(name_type fname) noexcept :
-    m_name{ fname },
+    m_name{ std::move(fname) },
     m_cur{ m_buf.begin() }
   {
     read();
@@ -84,7 +84,7 @@ namespace config
   void cfg_file::read() noexcept
   {
     m_buf.clear();
-    in_type in(m_name.data());
+    in_type in{ m_name.string() };
     if (!in)
       return;
 

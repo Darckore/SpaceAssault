@@ -28,5 +28,11 @@
 
 // just because it is often needed everywhere
 using namespace std::literals;
+namespace fsys = std::filesystem;
 
 #include "utils/utils.hpp"
+
+namespace engine
+{
+  using time_type = float;
+}
