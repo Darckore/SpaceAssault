@@ -1,5 +1,6 @@
 #pragma once
 #include "gfx/window.hpp"
+#include "gfx/renderer.hpp"
 
 namespace engine
 {
@@ -25,19 +26,21 @@ namespace engine::graphics
     using scale_type     = vertex_type::value_type;
 
   public:
-    CLASS_SPECIALS_NONE(gfx);
+    CLASS_SPECIALS_NONE_CUSTOM(gfx);
 
     ~gfx() noexcept;
 
     explicit operator bool() const noexcept;
 
   private:
-    gfx(window& wnd) noexcept;
+    gfx() noexcept;
 
   public:
+    window create_window() noexcept;
+
     ratio_type aspect() const noexcept;
-    size_type width() const noexcept;
-    size_type height() const noexcept;
+    size_type  width() const noexcept;
+    size_type  height() const noexcept;
 
     void bind_scaling(scale_type scale) noexcept;
     void set_origin(vertex_type origin) noexcept;
@@ -51,19 +54,16 @@ namespace engine::graphics
     void draw() noexcept;
     void setup() noexcept;
 
-    renderer& get_renderer() noexcept;
-    void release_renderer() noexcept;
-
     ratio_type calc_aspect_ratio() const noexcept;
 
     vertex_type world_to_viewport(const vertex_type& v) const noexcept;
 
   private:
-    window& m_wnd;
-    renderer& m_renderer;
+    window        m_wnd;
+    renderer      m_renderer;
     viewport_size m_size{};
-    ratio_type m_aspect{};
-    vertex_type m_origin{};
-    scale_type m_scale{};
+    ratio_type    m_aspect{};
+    vertex_type   m_origin{};
+    scale_type    m_scale{};
   };
 }

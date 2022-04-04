@@ -12,30 +12,6 @@
 
 namespace engine::graphics
 {
-  // Statics
-
-  renderer::storage_type& renderer::storage() noexcept
-  {
-    static storage_type storage;
-    return storage;
-  }
-
-  renderer& renderer::get(const gfx* g, const window& wnd) noexcept
-  {
-    auto&& store = storage();
-    if (auto item = store.find(g); item != store.end())
-    {
-      return item->second;
-    }
-
-    return store.emplace(g, wnd).first->second;
-  }
-  void renderer::release(const gfx* g) noexcept
-  {
-    auto&& store = storage();
-    store.erase(g);
-  }
-
   // Special members
 
   renderer::~renderer() noexcept

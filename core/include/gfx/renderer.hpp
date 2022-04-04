@@ -3,7 +3,6 @@
 namespace engine::graphics
 {
   class window;
-  class gfx;
   class sprite;
 
   namespace detail
@@ -15,17 +14,9 @@ namespace engine::graphics
   {
   private:
     using size_type    = std::size_t;
-    using storage_type = std::unordered_map<const gfx*, renderer>;
     using point_type   = utils::vecd2;
     using pixel_type   = utils::vecf2;
     using pipeline_ptr = std::unique_ptr<detail::pipeline>;
-
-  public:
-    static renderer& get(const gfx* g, const window& wnd) noexcept;
-    static void release(const gfx* g) noexcept;
-
-  private:
-    static storage_type& storage() noexcept;
 
   public:
     CLASS_SPECIALS_NONE(renderer);

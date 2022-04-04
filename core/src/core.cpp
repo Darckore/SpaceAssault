@@ -14,15 +14,13 @@ namespace engine
   // Special members
 
   core::core(game_type& game) noexcept :
-    m_wnd{ create_window() },
-    m_gfx{ init_graphics(m_wnd) },
     m_game{ game }
   {
   }
 
   core::operator bool() const noexcept
   {
-    return m_wnd && m_gfx;
+    return static_cast<bool>(m_gfx);
   }
 
   // Private members
@@ -79,18 +77,5 @@ namespace engine
   core::graphics_type& core::gfx() noexcept
   {
     return m_gfx;
-  }
-
-  core::window_type core::create_window() noexcept
-  {
-  #ifdef NDEBUG
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
-  #endif
-
-    return { "Space Assault", "SA_MAIN" };
-  }
-  core::graphics_type core::init_graphics(window_type& wnd) noexcept
-  {
-    return { wnd };
   }
 }

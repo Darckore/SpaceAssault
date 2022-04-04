@@ -5,15 +5,12 @@ namespace engine::graphics
 {
   // Special members
 
-  gfx::~gfx() noexcept
-  {
-    release_renderer();
-  }
+  gfx::~gfx() noexcept = default;
 
-  gfx::gfx(window& wnd) noexcept :
-    m_wnd{ wnd },
-    m_renderer{ get_renderer() },
-    m_size{ wnd.size() },
+  gfx::gfx() noexcept :
+    m_wnd{ create_window() },
+    m_renderer{ m_wnd },
+    m_size{ m_wnd.size() },
     m_aspect{ calc_aspect_ratio() }
   { }
 
@@ -56,6 +53,15 @@ namespace engine::graphics
 
   // Private members
 
+  window gfx::create_window() noexcept
+  {
+  #ifdef NDEBUG
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+  #endif
+
+    return { "Todo", "GAME_MAIN" };
+  }
+
   void gfx::begin_frame() noexcept
   {
     setup();
@@ -76,15 +82,6 @@ namespace engine::graphics
     m_size = wndSize;
     m_aspect = calc_aspect_ratio();
     m_renderer.resize();
-  }
-
-  renderer& gfx::get_renderer() noexcept
-  {
-    return renderer::get(this, m_wnd);
-  }
-  void gfx::release_renderer() noexcept
-  {
-    renderer::release(this);
   }
 
   gfx::ratio_type gfx::calc_aspect_ratio() const noexcept
