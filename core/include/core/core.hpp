@@ -19,7 +19,6 @@ namespace engine
     static constexpr auto framerate = utils::inv(fps);
 
   private:
-    static bool past_frame(time_type dt) noexcept;
     static time_type clamp_time(time_type dt) noexcept;
 
   public:
