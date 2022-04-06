@@ -7,10 +7,6 @@ namespace engine
   class core
   {
   public:
-    friend class base_game;
-    using graphics_type = graphics::gfx;
-
-  public:
     CLASS_SPECIALS_NONE_CUSTOM(core);
 
     core() noexcept;
