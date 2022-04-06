@@ -9,9 +9,8 @@ namespace engine
   public:
     CLASS_SPECIALS_NONE_CUSTOM(core);
 
+  private:
     core() noexcept;
-
-    explicit operator bool() const noexcept;
 
   private:
     void run() noexcept;
