@@ -82,7 +82,7 @@ namespace assault::game
 
     auto camOpt = lvl->get_option("camera"sv);
     if (!camOpt) return false;
-    auto tOpt = camOpt->to<double, double, double>();
+    auto tOpt = camOpt->to<float, float, float>();
     if (!tOpt) return false;
     auto [posX, posY, visible] = *tOpt;
 

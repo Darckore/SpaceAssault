@@ -13,9 +13,8 @@ namespace engine::graphics
   class renderer
   {
   private:
-    using size_type    = std::size_t;
-    using point_type   = utils::vecd2;
-    using pixel_type   = utils::vecf2;
+    using point_type   = vec2;
+    using pixel_type   = vec2;
     using pipeline_ptr = std::unique_ptr<detail::pipeline>;
 
   public:

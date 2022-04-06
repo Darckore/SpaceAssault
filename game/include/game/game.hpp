@@ -6,6 +6,7 @@ namespace assault::game
   class game final : public engine::base_game
   {
   public:
+    using time_type = engine::time_type;
     using base_type = engine::base_game;
 
   public:

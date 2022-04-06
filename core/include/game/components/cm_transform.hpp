@@ -6,7 +6,7 @@ namespace engine::world::components
   class transform final : public base_component<transform>
   {
   public:
-    using vector_type = utils::vecd2;
+    using vector_type = vec2;
 
   public:
     CLASS_SPECIALS_NODEFAULT(transform);

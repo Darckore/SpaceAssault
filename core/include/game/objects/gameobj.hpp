@@ -7,8 +7,8 @@ namespace engine::world
   {
   public:
     using component_type = component;
-    using id_type = component_type::id_type;
-    using data_type = std::unordered_map<id_type, component_type*>;
+    using id_type        = component_type::id_type;
+    using data_type      = std::unordered_map<id_type, component_type*>;
 
   public:
     CLASS_SPECIALS_NOCOPY_CUSTOM(game_object);

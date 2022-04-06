@@ -15,9 +15,8 @@ namespace engine
     friend class core;
 
   public:
-    using time_type     = core::time_type;
-    using graphics_type = core::graphics_type;
-    using scene_type    = world::scene;
+    using graphics_type   = core::graphics_type;
+    using scene_type      = world::scene;
     using component_store = world::component_store;
 
   public:

@@ -8,9 +8,6 @@ namespace engine
   {
   public:
     friend class base_game;
-
-    using time_type     = engine::time_type;
-    using clock_type    = utils::clock<time_type>;
     using graphics_type = graphics::gfx;
     using game_type     = base_game;
 

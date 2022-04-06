@@ -16,7 +16,7 @@ namespace config
   public:
     using bool_val   = bool;
     using int_val    = std::int64_t;
-    using float_val  = double;
+    using float_val  = float;
     using str_val    = std::string_view;
     using value_type = std::variant<
                                      bool_val,

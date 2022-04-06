@@ -6,7 +6,7 @@ namespace engine
 {
   // Statics
 
-  core::time_type core::clamp_time(time_type dt) noexcept
+  time_type core::clamp_time(time_type dt) noexcept
   {
     return std::min(dt, framerate);
   }

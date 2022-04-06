@@ -7,6 +7,7 @@ namespace assault::game
   {
   public:
     using base_type = engine::world::scene;
+    using time_type = engine::time_type;
 
   public:
     CLASS_SPECIALS_NONE(level);

@@ -99,7 +99,7 @@ namespace engine_tests
     constexpr auto optName = "neko"sv;
     constexpr auto intVal = 10;
     constexpr auto boolVal = false;
-    constexpr auto floatVal = 42.69;
+    constexpr auto floatVal = 42.69f;
     constexpr auto strVal = "kitty"sv;
 
     auto&& opt = s.add_option(optName);
@@ -141,7 +141,7 @@ namespace engine_tests
 
     option opt{ "opt"sv, s };
     opt.add_value(1);
-    opt.add_value(2.0);
+    opt.add_value(2.0f);
     opt.add_value(false);
     opt.add_value("hi there"sv);
 
@@ -153,14 +153,14 @@ namespace engine_tests
     auto toStruct = opt.to<opt_struct>();
     ASSERT_TRUE(toStruct);
     EXPECT_EQ((toStruct->get<0>()), 1ll);
-    EXPECT_DOUBLE_EQ((toStruct->get<1>()), 2.0);
+    EXPECT_DOUBLE_EQ((toStruct->get<1>()), 2.0f);
     EXPECT_EQ((toStruct->get<2>()), false);
     EXPECT_EQ((toStruct->get<3>()), "hi there"sv);
 
-    auto toTuple = opt.to<long long, double, bool, std::string_view>();
+    auto toTuple = opt.to<long long, float, bool, std::string_view>();
     ASSERT_TRUE(toTuple);
     EXPECT_EQ((std::get<0>(*toTuple)), 1ll);
-    EXPECT_DOUBLE_EQ((std::get<1>(*toTuple)), 2.0);
+    EXPECT_DOUBLE_EQ((std::get<1>(*toTuple)), 2.0f);
     EXPECT_EQ((std::get<2>(*toTuple)), false);
     EXPECT_EQ((std::get<3>(*toTuple)), "hi there"sv);
   }
@@ -171,7 +171,7 @@ namespace engine_tests
 
     option opt{ "opt"sv, s };
     opt.add_value(1);
-    opt.add_value(2.0);
+    opt.add_value(2.0f);
     opt.add_value(false);
     opt.add_value("hi there"sv);
 
@@ -209,7 +209,7 @@ namespace engine_tests
     ASSERT_TRUE(wrap);
 
     EXPECT_EQ((wrap.i()), 1ll);
-    EXPECT_DOUBLE_EQ((wrap.f()), 2.0);
+    EXPECT_DOUBLE_EQ((wrap.f()), 2.0f);
     EXPECT_EQ((wrap.b()), false);
     EXPECT_EQ((wrap.s()), "hi there"sv);
   }
@@ -364,11 +364,11 @@ namespace engine_tests
 
     //floatp{ 69.5 }
     opt = get_option(*sec, "floatp"sv);
-    check_opt_value(*opt, 1, 0, 69.5);
+    check_opt_value(*opt, 1, 0, 69.5f);
 
     //floatn{ -69.5 }
     opt = get_option(*sec, "floatn"sv);
-    check_opt_value(*opt, 1, 0, -69.5);
+    check_opt_value(*opt, 1, 0, -69.5f);
 
     //boolt{ true }
     opt = get_option(*sec, "boolt"sv);
@@ -385,7 +385,7 @@ namespace engine_tests
     //mult{ 1, 2.0, 'three', true }
     opt = get_option(*sec, "mult"sv);
     check_opt_value(*opt, 4, 0, 1ll);
-    check_opt_value(*opt, 4, 1, 2.0);
+    check_opt_value(*opt, 4, 1, 2.0f);
     check_opt_value(*opt, 4, 2, "three"sv);
     check_opt_value(*opt, 4, 3, true);
   }

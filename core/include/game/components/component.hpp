@@ -8,7 +8,7 @@ namespace engine::world
   {
   public:
     using time_type  = engine::time_type;
-    using id_type    = std::size_t;
+    using id_type    = std::uint32_t;
     using owner_type = game_object;
 
   protected:

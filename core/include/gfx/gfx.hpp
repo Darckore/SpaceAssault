@@ -22,7 +22,7 @@ namespace engine::graphics
     using viewport_size  = window::dimensions;
     using size_type      = window::size_type;
     using ratio_type     = utils::ratio<size_type>;
-    using vertex_type    = utils::vecd2;
+    using vertex_type    = vec2;
     using scale_type     = vertex_type::value_type;
 
   public:

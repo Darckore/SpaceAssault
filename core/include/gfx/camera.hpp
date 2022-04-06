@@ -6,9 +6,9 @@ namespace engine::graphics
   class camera
   {
   public:
-    using pos_type    = utils::vecd2;
+    using pos_type    = vec2;
     using gfx_type    = gfx;
-    using dist_type   = double;
+    using dist_type   = pos_type::value_type;
     using aspect_type = gfx::ratio_type;
 
   public:

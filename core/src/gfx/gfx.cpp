@@ -1,5 +1,6 @@
 #include "gfx/gfx.hpp"
 #include "gfx/renderer.hpp"
+#include "core/win_includes.hpp"
 
 namespace engine::graphics
 {
