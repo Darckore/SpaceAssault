@@ -4,23 +4,15 @@
 
 namespace engine
 {
-  // Statics
-
-  time_type core::clamp_time(time_type dt) noexcept
-  {
-    return std::min(dt, framerate);
-  }
-
   // Special members
 
-  core::core(game_type& game) noexcept :
-    m_game{ game }
+  core::core() noexcept
   {
   }
 
   core::operator bool() const noexcept
   {
-    return static_cast<bool>(m_gfx);
+    return true;
   }
 
   // Private members
@@ -32,10 +24,7 @@ namespace engine
       return;
     }
 
-    if (!m_game.init())
-    {
-      return;
-    }
+    // init game
 
     loop();
   }
@@ -51,31 +40,11 @@ namespace engine
         TranslateMessage(&msg);
         DispatchMessage(&msg);
       }
-
-      if (!m_gfx)
-      {
-        // todo: error
-        shutdown();
-      }
-
-      m_gfx.begin_frame();
-
-      m_game.update(clamp_time(clock()));
-      m_game.render();
-      
-      if (m_gfx)
-      {
-        m_gfx.draw();
-      }
+      // main loop
     }
   }
   void core::shutdown() noexcept
   {
     PostQuitMessage(0);
-  }
-
-  core::graphics_type& core::gfx() noexcept
-  {
-    return m_gfx;
   }
 }

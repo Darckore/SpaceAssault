@@ -5,8 +5,7 @@ namespace engine
 {
   // Special members
 
-  base_game::base_game() noexcept :
-    m_engine{ *this }
+  base_game::base_game() noexcept
   {
   }
 
@@ -38,17 +37,11 @@ namespace engine
 
   void base_game::run() noexcept
   {
-    m_engine.run();
   }
   void base_game::quit() noexcept
   {
-    m_engine.shutdown();
   }
 
-  base_game::graphics_type& base_game::gfx() noexcept
-  {
-    return m_engine.gfx();
-  }
   base_game::scene_type& base_game::scene() noexcept
   {
     return *m_curScene;

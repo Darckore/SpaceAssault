@@ -1,8 +1,7 @@
-#include "game/game.hpp"
-namespace sa = assault::game;
+#include "core/core.hpp"
 
 int main()
 {
-  sa::game game;
+
   return 0;
 }

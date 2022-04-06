@@ -41,7 +41,6 @@ namespace engine
     void run() noexcept;
     void quit() noexcept;
 
-    graphics_type& gfx() noexcept;
     scene_type& scene() noexcept;
 
     bool switch_scene(scene_type& s) noexcept;
@@ -49,7 +48,6 @@ namespace engine
     component_store& components() noexcept;
 
   private:
-    core m_engine;
     scene_type* m_curScene{};
 
     component_store m_components;

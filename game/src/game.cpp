@@ -1,15 +1,7 @@
 #include "game/game.hpp"
-#include "world/level.hpp"
 
 namespace assault::game
 {
-  // stupid test code
-  static level& make_lvl(auto& owner, auto& g) noexcept
-  {
-    static level lvl{ owner, g };
-    return lvl;
-  }
-
   // Special members
 
   game::~game() noexcept = default;
@@ -31,14 +23,7 @@ namespace assault::game
 
   bool game::before_run() noexcept
   {
-    // stupid test code
-    auto&& lvl = make_lvl(*this, gfx());
-    if (!lvl.load())
-    {
-      return false;
-    }
-
-    return switch_scene(lvl);
+    return true;
   }
   void game::on_update(time_type dt) noexcept
   {
