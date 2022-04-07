@@ -24,7 +24,7 @@
 
 #include <filesystem>
 #include <memory>
-#include <stdexcept>
+#include <new>
 
 // just because it is often needed everywhere
 using namespace std::literals;

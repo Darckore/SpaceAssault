@@ -4,9 +4,27 @@
 
 namespace engine
 {
+  // Statics
+
+  void core::startup() noexcept
+  {
+    if (auto&& inst = instance())
+    {
+      inst->run();
+    }
+
+    // todo: error
+  }
+
   // Special members
 
-  core::core() noexcept
+  core::~core() noexcept
+  {
+    quit();
+  }
+
+  core::core(game_type& game) noexcept :
+    m_game{ game }
   {
   }
 
@@ -20,7 +38,7 @@ namespace engine
   {
     // main loop
   }
-  void core::shutdown() noexcept
+  void core::quit() noexcept
   {
     // exit
   }

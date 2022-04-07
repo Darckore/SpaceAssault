@@ -5,8 +5,17 @@ namespace engine
 {
   // Special members
 
+  base_game::~base_game() noexcept
+  {
+    core::shutdown();
+  }
+
   base_game::base_game() noexcept
   {
+    if (!core::create(*this))
+    {
+      // todo: error
+    }
   }
 
   // Private members
@@ -37,9 +46,11 @@ namespace engine
 
   void base_game::run() noexcept
   {
+    core::startup();
   }
   void base_game::quit() noexcept
   {
+    core::shutdown();
   }
 
   base_game::scene_type& base_game::scene() noexcept

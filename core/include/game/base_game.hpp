@@ -22,6 +22,8 @@ namespace engine
   public:
     CLASS_SPECIALS_NONE_CUSTOM(base_game);
 
+    virtual ~base_game() noexcept;
+
     base_game() noexcept;
 
   public:
