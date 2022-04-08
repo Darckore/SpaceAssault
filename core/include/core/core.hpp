@@ -5,7 +5,7 @@ namespace engine
 {
   class base_game;
 
-  class core : public singleton<core>
+  class core final : public singleton<core>
   {
   public:
     static void startup() noexcept;

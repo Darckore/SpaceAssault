@@ -10,6 +10,8 @@
 
 namespace engine::graphics::detail
 {
+  HWND window_handle(const window& wnd) noexcept;
+
   using size_type = std::uint64_t;
   
   template <typename T>
@@ -308,7 +310,7 @@ namespace engine::graphics::detail
       desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
       desc.Flags = 0;
 
-      auto handle = m_wnd.handle<HWND>();
+      auto handle = window_handle(m_wnd);
       com_ptr<IDXGISwapChain1> sc;
       auto res = m_factory->CreateSwapChainForHwnd(m_cmdQueue.Get(), handle,
                                                    &desc, nullptr, nullptr, &sc);

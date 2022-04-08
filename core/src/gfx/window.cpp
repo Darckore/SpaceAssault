@@ -3,19 +3,98 @@
 
 namespace engine::graphics
 {
+  // Additional definitions
+  namespace detail
+  {
+    struct msg_wrapper
+    {
+      HWND handle;
+      UINT msg_code;
+      WPARAM wp;
+      LPARAM lp;
+    };
+
+    struct wnd_helper
+    {
+      static constexpr auto windowClass = "MAINWND"sv;
+
+      static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+      {
+        window* wndPtr = nullptr;
+        if (msg == WM_NCCREATE)
+        {
+          wndPtr = reinterpret_cast<window*>(((LPCREATESTRUCT)lParam)->lpCreateParams);
+          SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wndPtr));
+          return TRUE;
+        }
+
+        wndPtr = reinterpret_cast<window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+        if (wndPtr)
+        {
+          return wndPtr->window_proc({ hwnd, msg, wParam, lParam });
+        }
+
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+      }
+      static auto make_wnd_class(std::string_view className) noexcept
+      {
+        auto inst_handle = GetModuleHandle(0);
+
+        WNDCLASSEX wc = {};
+        wc.cbSize = sizeof(WNDCLASSEX);
+        wc.style = CS_HREDRAW | CS_VREDRAW;
+        wc.lpfnWndProc = wnd_proc;
+        wc.cbClsExtra = 0;
+        wc.cbWndExtra = 0;
+        wc.hInstance = inst_handle;
+        wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+        wc.hIconSm = wc.hIcon;
+        wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+        wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
+        wc.lpszMenuName = NULL;
+        wc.lpszClassName = className.data();
+
+        if (!RegisterClassEx(&wc))
+        {
+          return decltype(inst_handle){};
+        }
+
+        return inst_handle;
+      }
+      static auto calc_size() noexcept
+      {
+        MONITORINFO monitorInfo{ sizeof(monitorInfo) };
+        auto monitorHandle = MonitorFromPoint(POINT{}, MONITOR_DEFAULTTOPRIMARY);
+        GetMonitorInfo(monitorHandle, &monitorInfo);
+
+        const auto& monitorRect = monitorInfo.rcMonitor;
+        const auto posX = monitorRect.left;
+        const auto posY = monitorRect.top;
+        const auto width = monitorRect.right - posX;
+        const auto height = monitorRect.bottom - posY;
+        return RECT{ posX, posY, width, height };
+      }
+    };
+  
+    HWND window_handle(const window& wnd) noexcept
+    {
+      return reinterpret_cast<HWND>(wnd.handle());
+    }
+  }
+
   // Special members
 
   window::~window() noexcept
   {
+    using detail::wnd_helper;
+    using detail::window_handle;
     auto inst_handle = GetModuleHandle(0);
-    DestroyWindow(handle<HWND>());
-    m_handle = nullptr;
-    UnregisterClass(m_name.c_str(), inst_handle);
+    DestroyWindow(window_handle(*this));
+    m_handle = 0;
+    UnregisterClass(wnd_helper::windowClass.data(), inst_handle);
   }
 
-  window::window(str_type title, str_type name) noexcept :
-    m_title{ std::move(title) },
-    m_name{ std::move(name) }
+  window::window() noexcept
   {
     init();
   }
@@ -24,16 +103,6 @@ namespace engine::graphics
   {
     return static_cast<bool>(m_handle);
   }
-
-  // Additional definitions
-
-  struct window::msg_wrapper
-  {
-    HWND handle;
-    UINT msg_code;
-    WPARAM wp;
-    LPARAM lp;
-  };
 
   // Public members
 
@@ -54,6 +123,10 @@ namespace engine::graphics
     return DefWindowProc(handle, msg_code, wp, lp);
   }
 
+  window::handle_type window::handle() const noexcept
+  {
+    return m_handle;
+  }
   window::dimensions window::size() const noexcept
   {
     return m_size;
@@ -61,69 +134,11 @@ namespace engine::graphics
 
   // Private members
 
-  struct wnd_helper
-  {
-    static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-    {
-      window* wndPtr = nullptr;
-      if (msg == WM_NCCREATE)
-      {
-        wndPtr = reinterpret_cast<window*>(((LPCREATESTRUCT)lParam)->lpCreateParams);
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(wndPtr));
-        return TRUE;
-      }
-
-      wndPtr = reinterpret_cast<window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-      if (wndPtr)
-      {
-        return wndPtr->window_proc({ hwnd, msg, wParam, lParam });
-      }
-
-      return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-    static auto make_wnd_class(std::string_view className) noexcept
-    {
-      auto inst_handle = GetModuleHandle(0);
-
-      WNDCLASSEX wc = {};
-      wc.cbSize = sizeof(WNDCLASSEX);
-      wc.style = CS_HREDRAW | CS_VREDRAW;
-      wc.lpfnWndProc = wnd_proc;
-      wc.cbClsExtra = 0;
-      wc.cbWndExtra = 0;
-      wc.hInstance = inst_handle;
-      wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-      wc.hIconSm = wc.hIcon;
-      wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-      wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
-      wc.lpszMenuName = NULL;
-      wc.lpszClassName = className.data();
-
-      if (!RegisterClassEx(&wc))
-      {
-        return decltype(inst_handle){};
-      }
-
-      return inst_handle;
-    }
-    static auto calc_size() noexcept
-    {
-      MONITORINFO monitorInfo{ sizeof(monitorInfo) };
-      auto monitorHandle = MonitorFromPoint(POINT{}, MONITOR_DEFAULTTOPRIMARY);
-      GetMonitorInfo(monitorHandle, &monitorInfo);
-
-      const auto& monitorRect = monitorInfo.rcMonitor;
-      const auto posX   = monitorRect.left;
-      const auto posY   = monitorRect.top;
-      const auto width  = monitorRect.right - posX;
-      const auto height = monitorRect.bottom - posY;
-      return RECT{ posX, posY, width, height };
-    }
-  };
-
   void window::init() noexcept
   {
-    auto inst_handle = wnd_helper::make_wnd_class(m_name);
+    using detail::wnd_helper;
+    auto className   = wnd_helper::windowClass.data();
+    auto inst_handle = wnd_helper::make_wnd_class(className);
     if (!inst_handle)
     {
       // todo: error
@@ -133,8 +148,8 @@ namespace engine::graphics
     auto [posX, posY, width, height] = wnd_helper::calc_size();
     m_size = { width, height };
     auto handle = CreateWindow(
-      m_name.data(),
-      m_title.data(),
+      className,
+      nullptr,
       WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
       posX, posY, width, height,
       NULL, NULL,
@@ -151,10 +166,9 @@ namespace engine::graphics
     SetWindowPos(handle, HWND_TOP, posX, posY, width, height,
                  SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 
-    SetWindowText(handle, m_title.data());
     ShowWindow(handle, SW_SHOW);
     UpdateWindow(handle);
-    m_handle = handle;
+    m_handle = reinterpret_cast<handle_type>(handle);
   }
 
 }
