@@ -10,9 +10,8 @@ namespace engine
   public:
     static void startup() noexcept;
 
-  public:
+  private:
     using game_type = base_game;
-
     friend class singleton<core>;
 
   public:

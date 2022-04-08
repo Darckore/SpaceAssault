@@ -1,8 +1,11 @@
 #include "core/core.hpp"
+#include "core/sys_registry.hpp"
 #include "game/base_game.hpp"
 
 namespace engine
 {
+  using graphics::window;
+
   // Statics
 
   void core::startup() noexcept
@@ -31,14 +34,22 @@ namespace engine
 
   void core::run() noexcept
   {
-    // init game
+    if (!systems::init_system<window>())
+    {
+      // todo: error
+      return;
+    }
+
+    loop();
   }
   void core::loop() noexcept
   {
-    // main loop
+    while (systems::window().update())
+    {
+    }
   }
   void core::quit() noexcept
   {
-    // exit
+    systems::shutdown_system<window>();
   }
 }

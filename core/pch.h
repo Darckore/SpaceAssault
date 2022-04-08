@@ -26,6 +26,8 @@
 #include <memory>
 #include <new>
 
+#include <format>
+
 // just because it is often needed everywhere
 using namespace std::literals;
 namespace fsys = std::filesystem;

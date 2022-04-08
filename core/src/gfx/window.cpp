@@ -1,4 +1,5 @@
 #include "gfx/window.hpp"
+#include "core/sys_registry.hpp"
 #include "platform/windows/win_includes.hpp"
 
 namespace engine::graphics
@@ -28,10 +29,13 @@ namespace engine::graphics
           return TRUE;
         }
 
-        wndPtr = reinterpret_cast<window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-        if (wndPtr)
+        if (msg != WM_TIMER)
         {
-          return wndPtr->window_proc({ hwnd, msg, wParam, lParam });
+          wndPtr = reinterpret_cast<window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+          if (wndPtr)
+          {
+            return wndPtr->window_proc({ hwnd, msg, wParam, lParam });
+          }
         }
 
         return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -82,16 +86,34 @@ namespace engine::graphics
     }
   }
 
+  window::proc_result window::window_proc(msg_wrapper msg) noexcept
+  {
+    auto [handle, msg_code, wp, lp] = msg;
+    switch (msg_code)
+    {
+    case WM_SIZE:
+      m_size = { GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
+      return 0;
+
+    case WM_DESTROY:
+      close();
+      return 0;
+
+    case WM_KEYDOWN:
+      return 0;
+
+    case WM_KEYUP:
+      return 0;
+    }
+
+    return DefWindowProc(handle, msg_code, wp, lp);
+  }
+
   // Special members
 
   window::~window() noexcept
   {
-    using detail::wnd_helper;
-    using detail::window_handle;
-    auto inst_handle = GetModuleHandle(0);
-    DestroyWindow(window_handle(*this));
-    m_handle = 0;
-    UnregisterClass(wnd_helper::windowClass.data(), inst_handle);
+    close();
   }
 
   window::window() noexcept
@@ -106,21 +128,36 @@ namespace engine::graphics
 
   // Public members
 
-  window::proc_result window::window_proc(msg_wrapper msg) noexcept
+  void window::close() noexcept
   {
-    auto [handle, msg_code, wp, lp] = msg;
-    switch (msg_code)
-    {
-    case WM_SIZE:
-      m_size = { GET_X_LPARAM(lp), GET_Y_LPARAM(lp) };
-      return 0;
+    using detail::wnd_helper;
+    using detail::window_handle;
 
-    case WM_DESTROY:
-      PostQuitMessage(0);
-      return 0;
+    auto hwnd = window_handle(*this);
+    SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
+
+    auto inst_handle = GetModuleHandle(0);
+    DestroyWindow(hwnd);
+
+    m_handle = 0;
+    UnregisterClass(wnd_helper::windowClass.data(), inst_handle);
+  }
+
+  bool window::update() noexcept
+  {
+    if (!*this)
+    {
+      return false;
     }
 
-    return DefWindowProc(handle, msg_code, wp, lp);
+    MSG msg{};
+    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+    {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+
+    return msg.message != WM_QUIT;
   }
 
   window::handle_type window::handle() const noexcept
@@ -170,5 +207,4 @@ namespace engine::graphics
     UpdateWindow(handle);
     m_handle = reinterpret_cast<handle_type>(handle);
   }
-
 }
