@@ -1,7 +1,6 @@
 #include "gfx/renderer.hpp"
-#include "gfx/gfx.hpp"
 #include "gfx/window.hpp"
-#include "core/win_includes.hpp"
+#include "platform/windows/win_includes.hpp"
 #include "assets/sprite.hpp"
 
 #include "gfx/pipeline/d3d.hpp"

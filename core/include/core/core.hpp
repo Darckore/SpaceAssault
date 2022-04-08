@@ -1,7 +1,5 @@
 #pragma once
 #include "core/singleton_base.hpp"
-#include "gfx/window.hpp"
-#include "gfx/gfx.hpp"
 
 namespace engine
 {

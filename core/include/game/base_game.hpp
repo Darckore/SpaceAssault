@@ -15,7 +15,6 @@ namespace engine
     friend class core;
 
   public:
-    using graphics_type   = graphics::gfx;
     using scene_type      = world::scene;
     using component_store = world::component_store;
 

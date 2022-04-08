@@ -1,5 +1,5 @@
 #include "gfx/window.hpp"
-#include "core/win_includes.hpp"
+#include "platform/windows/win_includes.hpp"
 
 namespace engine::graphics
 {

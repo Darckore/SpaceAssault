@@ -33,12 +33,10 @@ namespace engine
   }
   void base_game::update(time_type dt) noexcept
   {
-    scene().update(dt);
     on_update(dt);
   }
   void base_game::render() noexcept
   {
-    scene().render();
     on_render();
   }
 
@@ -60,12 +58,6 @@ namespace engine
 
   bool base_game::switch_scene(scene_type& s) noexcept
   {
-    if (!s)
-    {
-      // todo: Report error here
-      return false;
-    }
-
     m_curScene = &s;
     return true;
   }

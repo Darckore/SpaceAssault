@@ -1,8 +1,8 @@
 #pragma once
 #include "gfx/window.hpp"
-#include "core/win_includes.hpp"
-#include "gfx/directx/d3d12.h"
-#include "gfx/directx/d3dx12.h"
+#include "platform/windows/win_includes.hpp"
+#include "platform/directx/d3d12.h"
+#include "platform/directx/d3dx12.h"
 #include <dxgi1_6.h>
 #include <wrl.h>
 #include <d3dcompiler.h>
