@@ -1,5 +1,6 @@
 #include "gfx/window.hpp"
 #include "core/sys_registry.hpp"
+#include "core/logger/logger.hpp"
 #include "platform/windows/win_includes.hpp"
 
 namespace engine::graphics
