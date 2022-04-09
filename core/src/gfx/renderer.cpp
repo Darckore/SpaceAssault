@@ -13,20 +13,11 @@ namespace engine::graphics
 {
   // Special members
 
-  renderer::~renderer() noexcept
-  {
-    CoUninitialize();
-  }
+  renderer::~renderer() noexcept = default;
 
   renderer::renderer(const window& wnd) noexcept :
     m_wnd{ wnd }
   {
-    if (FAILED(CoInitialize(nullptr)))
-    {
-      // todo: error
-      return;
-    }
-
     init();
   }
 
@@ -47,7 +38,7 @@ namespace engine::graphics
   {
     if (!m_pipeline || !m_pipeline->begin_frame())
     {
-      // todo: error
+      logger::error("Unable to initialise render frame");
       m_pipeline.reset(nullptr);
     }
   }
@@ -55,7 +46,7 @@ namespace engine::graphics
   {
     if (!m_pipeline || !m_pipeline->end_frame())
     {
-      // todo: error
+       logger::error("Unable to finalise render frame");
       m_pipeline.reset(nullptr);
     }
   }
@@ -75,7 +66,7 @@ namespace engine::graphics
     m_pipeline = std::make_unique<detail::pipeline>(m_wnd);
     if (!*m_pipeline)
     {
-      // todo: error
+      logger::error("Unable to initialise graphic pipeline");
       m_pipeline.reset(nullptr);
     }
   }

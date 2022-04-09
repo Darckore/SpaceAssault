@@ -31,7 +31,7 @@ namespace engine
         "note"sv
       };
 
-      constexpr auto fmt = "{1:%F, %H:%M:%OS}: [{0:}]: "sv;
+      constexpr auto fmt = "=={1:%F, %H:%M:%OS}== [{0:}]: "sv;
       const auto idx = static_cast<std::size_t>(lvl) - 1;
       const auto zt = std::chrono::zoned_time{
         std::chrono::current_zone(),

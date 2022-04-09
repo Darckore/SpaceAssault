@@ -183,7 +183,7 @@ namespace engine::graphics
     auto inst_handle = wnd_helper::make_wnd_class(className);
     if (!inst_handle)
     {
-      // todo: error
+      logger::error("Unable to register window class '{}'", wnd_helper::windowClass);
       return;
     }
 
@@ -201,7 +201,7 @@ namespace engine::graphics
     
     if (!handle)
     {
-      // todo: error
+      logger::error("Window creation failed");
       return;
     }
 

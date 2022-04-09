@@ -16,7 +16,7 @@ namespace engine
       inst->run();
     }
 
-    // todo: error
+    logger::error("Engine startup failed");
   }
 
   // Special members
@@ -37,7 +37,7 @@ namespace engine
   {
     if (!systems::init_system<window>())
     {
-      // todo: error
+      logger::error("Unable to create window");
       return;
     }
 

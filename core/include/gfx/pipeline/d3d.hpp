@@ -1,6 +1,8 @@
 #pragma once
 #include "gfx/window.hpp"
 #include "platform/windows/win_includes.hpp"
+#include "core/logger/logger.hpp"
+
 #include "platform/directx/d3d12.h"
 #include "platform/directx/d3dx12.h"
 #include <dxgi1_6.h>
@@ -69,12 +71,12 @@ namespace engine::graphics::detail
       auto buf = m_backBuffers[m_currentBuf].Get();
       if (FAILED(alloc->Reset()))
       {
-        // todo: error
+        logger::warning("D3D allocator reset failed");
         return false;
       }
       if (FAILED(m_cmdList->Reset(alloc, nullptr)))
       {
-        // todo: error
+        logger::warning("D3D command list reset failed");
         return false;
       }
 
@@ -104,7 +106,7 @@ namespace engine::graphics::detail
 
       if (FAILED(m_cmdList->Close()))
       {
-        // todo: error
+        logger::warning("D3D unable to close the command list");
         return false;
       }
 
@@ -113,19 +115,19 @@ namespace engine::graphics::detail
 
       if (FAILED(m_cmdQueue->Signal(m_fences[m_currentBuf].Get(), m_fenceVals[m_currentBuf])))
       {
-        // todo: error
+        logger::warning("D3D unable to signal the command queue");
         return false;
       }
 
       if (FAILED(m_swapChain->Present(1, 0)))
       {
-        // todo: error
+        logger::warning("D3D Present failed");
         return false;
       }
 
       if (!wait())
       {
-        // todo: error
+        logger::warning("D3D sync failed");
         return false;
       }
       m_currentBuf = m_swapChain->GetCurrentBackBufferIndex();
@@ -176,7 +178,7 @@ namespace engine::graphics::detail
         auto alloc = create_allocator();
         if (!alloc)
         {
-          // todo: error
+          logger::warning("D3D unable to create command allocator for buffer {}", i);
           return false;
         }
         m_cmdAllocators[i] = alloc;
@@ -191,7 +193,7 @@ namespace engine::graphics::detail
       const auto res = D3D12GetDebugInterface(IID_PPV_ARGS(&dbg));
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D debug layer failed");
         return false;
       }
       dbg->EnableDebugLayer();
@@ -210,7 +212,7 @@ namespace engine::graphics::detail
       auto res = CreateDXGIFactory2(flags, IID_PPV_ARGS(&m_factory));
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D unable to create factory");
         return false;
       }
 
@@ -240,7 +242,7 @@ namespace engine::graphics::detail
 
         if (FAILED(res))
         {
-          // todo: error
+          logger::warning("D3D failed to select adapter");
           return false;
         }
       }
@@ -254,7 +256,7 @@ namespace engine::graphics::detail
                                    IID_PPV_ARGS(&m_device));
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D failed to create device");
         return false;
       }
 
@@ -316,21 +318,21 @@ namespace engine::graphics::detail
                                                    &desc, nullptr, nullptr, &sc);
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D failed to create swap chain");
         return false;
       }
 
       res = m_factory->MakeWindowAssociation(handle, DXGI_MWA_NO_ALT_ENTER);
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D window association failed");
         return false;
       }
 
       res = sc.As(&m_swapChain);
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D swap chain initialisation failed");
         return false;
       }
 
@@ -345,7 +347,7 @@ namespace engine::graphics::detail
 
       if (FAILED(m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_descriptorHeap))))
       {
-        // todo: error
+        logger::warning("D3D unable to create descriptor heap");
         return false;
       }
 
@@ -358,7 +360,7 @@ namespace engine::graphics::detail
                                              alloc, nullptr, IID_PPV_ARGS(&m_cmdList));
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D unable to create command list");
         return false;
       }
 
@@ -371,7 +373,7 @@ namespace engine::graphics::detail
       {
         if (FAILED(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fences[idx]))))
         {
-          // todo: error
+          logger::warning("D3D unable to create fence");
           return false;
         }
       }
@@ -379,7 +381,7 @@ namespace engine::graphics::detail
       m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
       if (!m_fenceEvent)
       {
-        // todo: error
+        logger::warning("D3D unable to create fence event");
         return false;
       }
 
@@ -401,7 +403,7 @@ namespace engine::graphics::detail
           continue;
         }
 
-        // todo: error
+        logger::warning("D3D unable to update rtvs");
         return false;
       }
 
@@ -416,7 +418,7 @@ namespace engine::graphics::detail
       {
         if (FAILED(fence->SetEventOnCompletion(value, m_fenceEvent)))
         {
-          // todo: error
+          logger::warning("D3D unable to set fence event");
           return false;
         }
 
@@ -505,7 +507,7 @@ namespace engine::graphics::detail
                                              nullptr);
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D unable to serialise root signature");
         return false;
       }
 
@@ -515,7 +517,7 @@ namespace engine::graphics::detail
                                           IID_PPV_ARGS(&m_rootSignature));
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D unable to create root signature");
         return false;
       }
 
@@ -535,7 +537,7 @@ namespace engine::graphics::detail
                                     nullptr);
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D unable to compile vertex shader");
         return false;
       }
 
@@ -552,7 +554,7 @@ namespace engine::graphics::detail
                               nullptr);
       if (FAILED(res))
       {
-        // todo: error
+        logger::warning("D3D unable to compile pixel shader");
         return false;
       }
 
@@ -602,7 +604,7 @@ namespace engine::graphics::detail
       
       if (FAILED(m_target->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_stateObj))))
       {
-        // todo: error
+        logger::warning("D3D unable to create pipeline state");
         return false;
       }
 

@@ -15,9 +15,10 @@ namespace engine
   base_game::base_game() noexcept
   {
     logger::init();
+    logger::note("Initialising the game");
     if (!core::create(*this))
     {
-      // todo: error
+      logger::error("Engine initialisation failed");
     }
   }
 
@@ -27,7 +28,7 @@ namespace engine
   {
     if (!before_run())
     {
-      // todo: error
+      logger::error("Failed to load the game");
       return false;
     }
 
