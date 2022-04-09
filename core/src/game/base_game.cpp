@@ -1,4 +1,5 @@
 #include "game/base_game.hpp"
+#include "core/logger/logger.hpp"
 #include "game/scene.hpp"
 
 namespace engine
@@ -8,10 +9,12 @@ namespace engine
   base_game::~base_game() noexcept
   {
     core::shutdown();
+    logger::shutdown();
   }
 
   base_game::base_game() noexcept
   {
+    logger::init();
     if (!core::create(*this))
     {
       // todo: error

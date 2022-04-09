@@ -15,18 +15,16 @@ namespace engine
 
     using enum level;
 
-    using fmt_type = std::string_view;
+    using fmt_type  = std::string_view;
+    using buf_type  = std::string;
+    using file_name = fsys::path;
 
   public:
     CLASS_SPECIALS_NONE(logger);
 
   private:
-    static auto& prologue(level lvl) noexcept
+    static void prologue(level lvl) noexcept
     {
-      constexpr auto initialSize = 256ull;
-      static std::string buf;
-      buf.reserve(initialSize);
-
       constexpr std::array severities {
         "fatal"sv,
         "warning"sv,
@@ -40,11 +38,9 @@ namespace engine
         std::chrono::system_clock::now()
       };
 
-      std::format_to(std::back_inserter(buf), fmt,
+      std::format_to(std::back_inserter(m_buf), fmt,
                      severities[idx],
                      zt);
-
-      return buf;
     }
 
     template <typename ...Args>
@@ -55,18 +51,48 @@ namespace engine
         return;
       }
 
-      auto&& buf = prologue(lvl);
+      prologue(lvl);
       
-      std::format_to(std::back_inserter(buf), fmt, std::forward<Args>(args)...);
-      std::cout << buf << std::endl;
+      std::format_to(std::back_inserter(m_buf), fmt, std::forward<Args>(args)...);
+      m_stream  << m_buf << '\n';
+      std::cout << m_buf << '\n';
 
-      buf.clear();
+      m_buf.clear();
     }
 
   public:
+    static void init()
+    {
+      constexpr auto initialSize = 256ull;
+      m_buf.reserve(initialSize);
+
+      m_file.open(m_fname.c_str());
+    }
+
+    static void dump()
+    {
+      if (!m_file)
+      {
+        return;
+      }
+
+      m_file << m_stream.rdbuf();
+    }
+
+    static void shutdown()
+    {
+      dump();
+      m_file.close();
+    }
+
     static void set_severity_level(level lvl) noexcept
     {
       m_lvl = lvl;
+    }
+
+    static void assign_file(file_name fname)
+    {
+      m_fname = std::move(fname);
     }
 
     template <typename ...Args>
@@ -88,6 +114,12 @@ namespace engine
     }
 
   private:
+    inline static file_name m_fname{ "engine.log" };
+    inline static buf_type  m_buf;
+
+    inline static std::stringstream m_stream;
+    inline static std::ofstream m_file;
+
     inline static level m_lvl{
     #ifndef NDEBUG
       lNote

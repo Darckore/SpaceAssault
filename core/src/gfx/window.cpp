@@ -174,6 +174,10 @@ namespace engine::graphics
 
   void window::init() noexcept
   {
+  #ifdef NDEBUG
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+  #endif
+
     using detail::wnd_helper;
     auto className   = wnd_helper::windowClass.data();
     auto inst_handle = wnd_helper::make_wnd_class(className);
