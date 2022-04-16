@@ -1,4 +1,0 @@
-.section { 
-  option { 1, 'string
-              fail' }
-}
